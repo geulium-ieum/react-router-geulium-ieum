@@ -16,6 +16,7 @@ import { getMe } from "./lib/apis/user";
 import { userContext } from "./context/userContext";
 import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "./components/ui/sidebar";
 import Header from "./components/organisms/Header";
+import { Footer } from "./components/organisms/Footer";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -115,8 +116,9 @@ export default function App({ loaderData }: Route.ComponentProps) {
     <>
       <Header user={user} />
       <Outlet />
+      <Footer />
     </>
-  )
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

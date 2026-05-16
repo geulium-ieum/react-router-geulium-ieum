@@ -11,7 +11,14 @@ import { Link } from 'react-router';
 
 export function Footer() {
   const [activeDialog, setActiveDialog] = useState<'faq' | 'inquiry' | 'guide' | 'terms' | 'privacy' | 'accessibility' | null>(null);
+  const pathname = location.pathname;
 
+  if (
+    pathname === '/register'
+    ) {
+    return null;
+  }
+  
   return (
     <>
       <footer className="bg-gray-900 text-gray-300">
