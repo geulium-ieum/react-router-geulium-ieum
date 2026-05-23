@@ -9,5 +9,7 @@ export default [
     route("/auth/naver/login", "./components/NaverLogin.tsx"),
     route("/auth/kakao/login", "./components/KakaoLogin.tsx"),
     route("/auth/logout", "./components/Logout.tsx"),
+    route("/help", "./components/pages/customer/help.tsx"),
+    route("/help-board", "./components/pages/customer/helpboard.tsx"),
   ]),
 ] satisfies RouteConfig;
