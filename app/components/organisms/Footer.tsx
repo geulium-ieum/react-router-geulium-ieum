@@ -57,7 +57,7 @@ export function Footer() {
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link
-                    to="/help-board"
+                    to="/help"
                     className="font-medium hover:text-white transition-colors"
                   >
                     고객센터
