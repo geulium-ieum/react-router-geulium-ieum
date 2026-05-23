@@ -29,13 +29,7 @@ export default function Header({ user }: { user: User | null, }) {
         <header className="bg-white shadow-sm border-b sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <FlexDiv className="items-center justify-between">
-                    <Link to={
-                        user?.role === "ADMIN" ||
-                            user?.role === "SUPER_ADMIN" ?
-                            '/admin-dashboard'
-                            :
-                            '/'
-                    }>
+                    <Link to="/">
                         <FlexDiv className="items-center gap-3 cursor-pointer">
                             <div className="w-10 h-10 bg-linear-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
                                 <span className="text-white">🕊️</span>
@@ -59,7 +53,7 @@ export default function Header({ user }: { user: User | null, }) {
                             <Link to="/login">
                                 <Button
                                     variant="ghost"
-                                    className="text-gray-700 hover:text-gray-900 transition-colors px-0!"
+                                    className="text-sm text-gray-700 hover:text-gray-900 transition-colors px-0!"
                                 >
                                     로그인
                                 </Button>
@@ -67,67 +61,41 @@ export default function Header({ user }: { user: User | null, }) {
                         </nav>
                     )}
 
-                    <nav className="hidden md:flex items-center gap-6">
-                        {user && (
-                            <>
-                                {(user.role === "USER" || !user.role) && (
-                                    <>
-                                        <Link to="/announcements">
-                                            <Button
-                                                variant="ghost"
-                                                className="text-gray-700 hover:text-gray-900 transition-colors"
-                                            >
-                                                공지사항
-                                            </Button>
-                                        </Link>
-                                        <Link to="/search">
-                                            <Button
-                                                variant="ghost"
-                                                className="text-gray-700 hover:text-gray-900 transition-colors"
-                                            >
-                                                고인 검색
-                                            </Button>
-                                        </Link>
-                                        <Link to="/family-groups">
-                                            <Button
-                                                variant="ghost"
-                                                className="text-gray-700 hover:text-gray-900 transition-colors"
-                                            >
-                                                가족 그룹
-                                            </Button>
-                                        </Link>
-                                        <ProfileDropDown user={user} />
-                                    </>
-                                )}
-                                {(user.role === "ADMIN" || user.role === "SUPER_ADMIN") && (
-                                    <>
-                                        <Link to="/admin-dashboard">
-                                            <Button
-                                                variant="ghost"
-                                                className="text-gray-700 hover:text-gray-900 transition-colors"
-                                            >
-                                                대시보드
-                                            </Button>
-                                        </Link>
-                                        <Link to="/announcements">
-                                            <Button
-                                                variant="ghost"
-                                                className="text-gray-700 hover:text-gray-900 transition-colors"
-                                            >
-                                                공지사항 관리
-                                            </Button>
-                                        </Link>
-                                        <ProfileDropDown user={user} />
-                                    </>
-                                )}
-                            </>
-                        )}
-                        {!user && (
+                    <nav className="hidden md:flex items-center gap-4">
+                        {user ? (
                             <>
                                 <Link to="/announcements">
                                     <Button
                                         variant="ghost"
-                                        className="text-gray-700 hover:text-gray-900 transition-colors"
+                                        className="text-sm text-gray-700 hover:text-gray-900 transition-colors"
+                                    >
+                                        공지사항
+                                    </Button>
+                                </Link>
+                                <Link to="/search">
+                                    <Button
+                                        variant="ghost"
+                                        className="text-sm text-gray-700 hover:text-gray-900 transition-colors"
+                                    >
+                                        고인 검색
+                                    </Button>
+                                </Link>
+                                <Link to="/family-groups">
+                                    <Button
+                                        variant="ghost"
+                                        className="text-sm text-gray-700 hover:text-gray-900 transition-colors"
+                                    >
+                                        가족 그룹
+                                    </Button>
+                                </Link>
+                                <ProfileDropDown user={user} />
+                            </>
+                        ) : (
+                            <>
+                                <Link to="/announcements">
+                                    <Button
+                                        variant="ghost"
+                                        className="text-sm text-gray-700 hover:text-gray-900 transition-colors"
                                     >
                                         공지사항
                                     </Button>
@@ -135,13 +103,13 @@ export default function Header({ user }: { user: User | null, }) {
                                 <Link to="/login">
                                     <Button
                                         variant="ghost"
-                                        className="text-gray-700 hover:text-gray-900 transition-colors"
+                                        className="text-sm text-gray-700 hover:text-gray-900 transition-colors"
                                     >
                                         로그인
                                     </Button>
                                 </Link>
                                 <Link to="/register">
-                                    <Button>
+                                    <Button className="text-sm">
                                         회원가입
                                     </Button>
                                 </Link>

@@ -9,7 +9,7 @@ export type Page =
   | 'register'
   | 'search'
   | 'memorial'
-  | 'mypage'
+  | 'my'
   | 'admin-dashboard'
   | 'admin-mypage'
   | 'family-groups'

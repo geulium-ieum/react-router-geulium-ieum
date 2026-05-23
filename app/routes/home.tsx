@@ -4,7 +4,10 @@ import {
   Building2,
   Globe,
   MessageSquareHeart,
+  PiggyBank,
+  Plane,
   Users,
+  Wallet,
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
@@ -22,7 +25,7 @@ export function meta({}: Route.MetaArgs) {
     {
       name: "description",
       content:
-        "거리와 장소에 구애받지 않고, 언제 어디서나 사랑하는 분을 추모하는 온라인 추모 공간",
+        "거리와 장소에 구애받지 않고, 장례 비용 부담을 줄이며 사랑하는 분을 추모하는 온라인 추모 공간",
     },
   ];
 }
@@ -48,6 +51,27 @@ const features = [
     headline: "함께하는 추모",
     description:
       "가족 그룹을 만들어 멀리 떨어져 있어도 한곳에서 마음을 모아 추모할 수 있습니다.",
+  },
+] as const;
+
+const costBenefits = [
+  {
+    icon: Plane,
+    title: "이동·숙박 비용 절감",
+    description:
+      "멀리 사는 가족도 직접 찾아올 필요 없이 온라인에서 함께 추모할 수 있어 교통비·숙박비 부담을 줄일 수 있습니다.",
+  },
+  {
+    icon: Building2,
+    title: "별도 추모 공간 불필요",
+    description:
+      "오프라인 추모 시설이나 반복 방문에 드는 비용 대신, 온라인 추모관 하나로 오래도록 기억을 이어갑니다.",
+  },
+  {
+    icon: Wallet,
+    title: "합리적인 장례 문화",
+    description:
+      "과도한 비용보다 고인을 기리는 마음에 집중할 수 있도록, 가족에게 남는 경제적 부담을 덜어 드립니다.",
   },
 ] as const;
 
@@ -84,6 +108,11 @@ export default function Home() {
             언제 어디서나, 가족과 함께 기억을 이어가세요.
           </p>
 
+          <p className="mx-auto mt-4 max-w-xl text-sm font-medium text-purple-700 dark:text-purple-300">
+            장소와 거리 제약이 없어, 불필요한 장례·추모 비용 부담도 함께 줄일 수
+            있습니다.
+          </p>
+
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
             <Button asChild size="lg" className="min-w-[140px] h-11 text-sm">
               <Link to="/register">시작하기</Link>
@@ -100,8 +129,64 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Cost savings — emphasized */}
+      <section
+        id="cost-savings"
+        className="relative overflow-hidden border-y border-purple-200/60 bg-linear-to-br from-purple-600 via-purple-700 to-blue-700 text-white dark:border-purple-900/50"
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-20"
+        >
+          <div className="absolute -right-20 top-0 h-64 w-64 rounded-full bg-white blur-3xl" />
+          <div className="absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-blue-300 blur-3xl" />
+        </div>
+
+        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+          <div className="text-center">
+            <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-sm font-semibold backdrop-blur-sm">
+              <PiggyBank className="size-4 shrink-0" aria-hidden />
+              <span>장례 비용 절약</span>
+            </p>
+            <h2 className="mt-5 text-2xl font-bold sm:text-3xl lg:text-4xl">
+              마음은 깊게,
+              <br className="sm:hidden" />
+              <span className="text-purple-100"> 부담은 가볍게</span>
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-purple-100 sm:text-lg">
+              전통적인 장례는 시설·이동·반복 방문 비용이 커질 수 있습니다.
+              그리움 이음은{" "}
+              <strong className="font-semibold text-white">
+                온라인 추모로 불필요한 지출을 줄이고
+              </strong>
+              , 고인을 기리는 데 집중할 수 있도록 돕습니다.
+            </p>
+          </div>
+
+          <ul className="mt-12 grid gap-5 sm:grid-cols-3">
+            {costBenefits.map(({ icon: Icon, title, description }) => (
+              <li key={title}>
+                <div className="h-full rounded-xl border border-white/20 bg-white/10 p-6 backdrop-blur-sm transition-colors hover:bg-white/15">
+                  <div className="mb-4 flex size-11 items-center justify-center rounded-lg bg-white text-purple-700">
+                    <Icon className="size-5" aria-hidden />
+                  </div>
+                  <h3 className="text-base font-semibold">{title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-purple-100">
+                    {description}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-10 text-center text-sm text-purple-200">
+            추모의 깊이는 비용이 아니라, 함께 나누는 마음에서 시작됩니다.
+          </p>
+        </div>
+      </section>
+
       {/* Value proposition */}
-      <section className="border-y border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-950">
+      <section className="border-b border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-950">
         <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
           <blockquote className="text-center">
             <p className="text-xl font-medium leading-snug text-gray-800 sm:text-2xl dark:text-gray-100">
@@ -160,7 +245,9 @@ export default function Home() {
             지금, 그리움을 이어 보세요
           </p>
           <p className="mt-4 text-purple-100">
-            회원가입 후 추모관을 만들고, 가족을 초대해 함께 추모할 수 있습니다.
+            회원가입 후 추모관을 만들고, 가족을 초대해 함께 추모하세요.
+            <br />
+            과도한 장례 비용 없이, 오래도록 이어지는 추모를 시작할 수 있습니다.
           </p>
           <Button
             asChild
