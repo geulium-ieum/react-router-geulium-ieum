@@ -116,7 +116,6 @@ export default function App({ loaderData }: Route.ComponentProps) {
     <>
       <Header user={user} />
       <Outlet />
-      <Footer />
     </>
   );
 }
