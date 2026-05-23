@@ -44,7 +44,7 @@ export default function Login() {
   const KakaoRedirectUri = import.meta.env.VITE_KAKAO_AUTH_REDIRECT_URI;
   const KakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KakaoClientId}&redirect_uri=${KakaoRedirectUri}&response_type=code`;
 
-  const handleUserSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleUserSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     const errors: FormErrors = {};
     if (!email.trim()) errors.email = '이메일을 입력해주세요.';
     if (!password) errors.password = '비밀번호를 입력해주세요.';

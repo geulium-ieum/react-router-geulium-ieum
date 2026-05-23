@@ -18,7 +18,7 @@ export default function ProfileDropDown({ user }: { user: User }) {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost">
+        <Button variant="ghost" className='text-sm'>
           {user.name} 님 <ChevronDown className="w-4 h-4 ml-2" />
         </Button>
       </DropdownMenuTrigger>
@@ -26,13 +26,8 @@ export default function ProfileDropDown({ user }: { user: User }) {
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <Link
-              to={
-                user.role === "ADMIN" ||
-                user.role === "SUPER_ADMIN" ?
-                    '/admin-mypage'
-                    :
-                    '/mypage'
-              }
+              to='/my'
+              className='text-sm'
               onClick={() => setOpen(false)}
             >
               마이페이지
