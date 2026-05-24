@@ -7,12 +7,13 @@ import GuideDialog from '~/components/templates/dialogs/Guide';
 import TermsDialog from '~/components/templates/dialogs/Terms';
 import PrivacyDialog from '~/components/templates/dialogs/Privacy';
 import AccessibilityDialog from '~/components/templates/dialogs/Accessibility';
-import { Link } from 'react-router';
+import { Link, useRouteLoaderData } from 'react-router';
+import type { Route as RootRoute } from "../../+types/root";
 
 export function Footer() {
-  const [activeDialog, setActiveDialog] = useState<'faq' | 'inquiry' | 'guide' | 'terms' | 'privacy' | 'accessibility' | null>(null);
-  
-  return (
+  const { user } = useRouteLoaderData("root") as RootRoute.ComponentProps["loaderData"];
+
+  const [activeDialog, setActiveDialog] = useState<'faq' | 'inquiry' | 'guide' | 'terms' | 'privacy' | 'accessibility' | null>(null);  return (
     <>
       <footer className="bg-gray-900 text-gray-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -65,20 +66,19 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    to="/one-on-one-inquiry"
+                    to={user ? `/helpboard/:${user.id}`: "/login" }
                     className="font-medium hover:text-white transition-colors"
                   >
                     1:1 문의
                   </Link>
                 </li>
                 <li>
-                  <Button
-                    variant="ghost"
-                    className="h-fit hover:text-white hover:bg-transparent transition-colors p-0"
-                    onClick={() => setActiveDialog('guide')}
+                  <Link
+                    to="/guide"
+                    className="font-medium hover:text-white transition-colors"
                   >
                     이용 가이드
-                  </Button>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -89,7 +89,7 @@ export function Footer() {
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link
-                    to="/policy/stipulations"
+                    to="/stipulation"
                     className="font-medium hover:text-white transition-colors"
                   >
                     이용약관
@@ -97,7 +97,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    to="/policy/privacy"
+                    to="/privacy"
                     className="font-medium hover:text-white transition-colors"
                   >
                     개인정보처리방침
@@ -105,7 +105,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    to="/policy/accessibility"
+                    to="/web"
                     className="font-medium hover:text-white transition-colors"
                   >
                     웹 접근성 정책

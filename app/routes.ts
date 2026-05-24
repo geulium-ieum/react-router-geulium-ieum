@@ -10,6 +10,10 @@ export default [
     route("/auth/kakao/login", "./components/KakaoLogin.tsx"),
     route("/auth/logout", "./components/Logout.tsx"),
     route("/help", "./components/pages/customer/help.tsx"),
-    route("/help-board", "./components/pages/customer/helpboard.tsx"),
+    route("/helpboard/:userId", "./components/pages/customer/helpboard.tsx"),
+    route("/guide", "./components/pages/customer/guide.tsx"),
+    route("/stipulation", "./components/pages/policy/stipulation.tsx"),
+    route("/web", "./components/pages/policy/web.tsx"),
+    route("/privacy", "./components/pages/policy/privacy.tsx"),
   ]),
 ] satisfies RouteConfig;
