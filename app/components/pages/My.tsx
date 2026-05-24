@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Settings, Heart, LogOut, Calendar } from 'lucide-react';
+import { User, Settings, Heart, LogOut } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { Card } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';

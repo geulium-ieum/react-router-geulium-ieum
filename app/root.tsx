@@ -7,6 +7,7 @@ import {
   redirect,
   Scripts,
   ScrollRestoration,
+  useLocation,
 } from "react-router";
 
 import type { Route } from "./+types/root";
@@ -82,14 +83,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <SidebarMenuItem>
                   <SidebarMenuButton>
                     <Link to="/search">
-                      <span className="text-lg font-semibold">고인 검색</span>
+                      <span className="text-lg font-semibold">고인검색</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton>
                     <Link to="/family-groups">
-                      <span className="text-lg font-semibold">가족 그룹</span>
+                      <span className="text-lg font-semibold">가족그룹</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -111,10 +112,14 @@ export async function loader({ context }: Route.LoaderArgs) {
 
 export default function App({ loaderData }: Route.ComponentProps) {
   const { user } = loaderData;
+  const location = useLocation();
+  const pathname = location.pathname;
 
   return (
     <>
-      <Header user={user} />
+      {pathname !== "/guides" && (
+        <Header user={user} />
+      )}
       <Outlet />
     </>
   );
