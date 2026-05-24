@@ -4,7 +4,7 @@ import type { FooterDialogProps } from "~/types";
 const content = [
     {
         question: "Q. 추모관은 어떻게 만드나요?",
-        answer: "로그인 후 '고인 검색' 메뉴에서 '새 추모관 등록' 버튼을 클릭하여 추모관을 생성할 수 있습니다. 관리자 승인 후 이용 가능합니다."
+        answer: "로그인 후 '고인검색' 메뉴에서 '새 추모관 등록' 버튼을 클릭하여 추모관을 생성할 수 있습니다. 관리자 승인 후 이용 가능합니다."
     },
     {
         question: "Q. 추모관은 무료인가요?",

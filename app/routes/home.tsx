@@ -18,16 +18,22 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Footer } from "~/components/organisms/Footer";
+import { userContext } from "~/context/userContext";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "그리움 이음 — 온라인 추모 서비스" },
+    { title: "그리움 이음 - 온라인 추모 서비스" },
     {
       name: "description",
       content:
         "거리와 장소에 구애받지 않고, 장례 비용 부담을 줄이며 사랑하는 분을 추모하는 온라인 추모 공간",
     },
   ];
+}
+
+export async function loader({ context }: Route.LoaderArgs) {
+  const user = context.get(userContext);
+  return { user };
 }
 
 const features = [
@@ -75,7 +81,9 @@ const costBenefits = [
   },
 ] as const;
 
-export default function Home() {
+export default function Home({ loaderData }: Route.ComponentProps) {
+  const { user } = loaderData;
+  
   return (
     <div className="overflow-y-auto h-full">
       {/* Hero */}
@@ -123,7 +131,7 @@ export default function Home() {
               size="lg"
               className="min-w-[140px] h-11 text-sm"
             >
-              <Link to="/search">고인 검색</Link>
+              <Link to="/search">고인검색</Link>
             </Button>
           </div>
         </div>

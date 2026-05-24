@@ -46,7 +46,7 @@ export function Footer() {
                     to="/search"
                     className="font-medium hover:text-white transition-colors"
                   >
-                    고인 검색
+                    고인검색
                   </Link>
                 </li>
               </ul>

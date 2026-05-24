@@ -77,7 +77,7 @@ export default function Header({ user }: { user: User | null, }) {
                                         variant="ghost"
                                         className="text-sm text-gray-700 hover:text-gray-900 transition-colors"
                                     >
-                                        고인 검색
+                                        고인검색
                                     </Button>
                                 </Link>
                                 <Link to="/family-groups">
@@ -85,7 +85,7 @@ export default function Header({ user }: { user: User | null, }) {
                                         variant="ghost"
                                         className="text-sm text-gray-700 hover:text-gray-900 transition-colors"
                                     >
-                                        가족 그룹
+                                        가족그룹
                                     </Button>
                                 </Link>
                                 <ProfileDropDown user={user} />
