@@ -1,10 +1,20 @@
 import { Outlet } from "react-router";
 import { Toaster } from "./ui/sonner";
+import type { Route } from "./+types/layout";
+import { cn } from "~/lib/utils";
 
-export default function RootLayout() {
+export async function loader({ request }: Route.LoaderArgs) {
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+    return { pathname }
+}
+
+export default function RootLayout({ loaderData }: Route.ComponentProps) {
+    const { pathname } = loaderData;
+    
     return (
-        <div className="h-[calc(100vh-73px)] bg-gray-50">
-            <main>
+        <div className={cn("bg-gray-50", pathname === "/guides" ? "h-dvh" : "h-[calc(100dvh-73px)]")}>
+            <main className="h-full">
                 <Outlet />
             </main>
             <Toaster />
