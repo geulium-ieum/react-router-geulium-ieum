@@ -67,7 +67,7 @@ export default function Header({ user }: { user: User | null, }) {
                                 <Link to="/announcements">
                                     <Button
                                         variant="ghost"
-                                        className="text-sm text-gray-700 hover:text-gray-900 transition-colors"
+                                        className="text-sm text-gray-700 hover:text-gray-900 transition-colors cursor-pointer"
                                     >
                                         공지사항
                                     </Button>
@@ -75,7 +75,7 @@ export default function Header({ user }: { user: User | null, }) {
                                 <Link to="/search">
                                     <Button
                                         variant="ghost"
-                                        className="text-sm text-gray-700 hover:text-gray-900 transition-colors"
+                                        className="text-sm text-gray-700 hover:text-gray-900 transition-colors cursor-pointer"
                                     >
                                         고인검색
                                     </Button>
@@ -83,7 +83,7 @@ export default function Header({ user }: { user: User | null, }) {
                                 <Link to="/family-groups">
                                     <Button
                                         variant="ghost"
-                                        className="text-sm text-gray-700 hover:text-gray-900 transition-colors"
+                                        className="text-sm text-gray-700 hover:text-gray-900 transition-colors cursor-pointer"
                                     >
                                         가족그룹
                                     </Button>
@@ -95,7 +95,7 @@ export default function Header({ user }: { user: User | null, }) {
                                 <Link to="/announcements">
                                     <Button
                                         variant="ghost"
-                                        className="text-sm text-gray-700 hover:text-gray-900 transition-colors"
+                                        className="text-sm text-gray-700 hover:text-gray-900 transition-colors cursor-pointer"
                                     >
                                         공지사항
                                     </Button>
@@ -103,13 +103,13 @@ export default function Header({ user }: { user: User | null, }) {
                                 <Link to="/login">
                                     <Button
                                         variant="ghost"
-                                        className="text-sm text-gray-700 hover:text-gray-900 transition-colors"
+                                        className="text-sm text-gray-700 hover:text-gray-900 transition-colors cursor-pointer"
                                     >
                                         로그인
                                     </Button>
                                 </Link>
                                 <Link to="/register">
-                                    <Button className="text-sm">
+                                    <Button className="text-sm cursor-pointer">
                                         회원가입
                                     </Button>
                                 </Link>
