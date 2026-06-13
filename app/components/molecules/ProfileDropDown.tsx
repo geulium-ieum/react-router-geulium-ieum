@@ -26,7 +26,7 @@ export default function ProfileDropDown({ user }: { user: User }) {
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <Link
-              to='/my'
+              to='/mypage'
               className='text-sm'
               onClick={() => setOpen(false)}
             >
