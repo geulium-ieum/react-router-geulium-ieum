@@ -1,9 +1,17 @@
 import { userContext } from "~/context/userContext";
 import type { Route } from "./+types/Detail";
 import { getSession } from "~/lib/sessions.server";
-import { redirect } from "react-router";
+import { redirect, useNavigate } from "react-router";
 import { familyGroupService } from "~/lib/services/familyGroup";
 import { userService } from "~/lib/services/user";
+import { Button } from "~/components/ui/button";
+import { ArrowLeftIcon, PlusIcon, StickyNoteOff, Trash2, UserPlus, Users } from "lucide-react";
+import FlexDiv from "~/components/FlexDiv";
+import { Card } from "~/components/ui/card";
+import moment from "moment";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
+import { Label } from "~/components/ui/label";
+import { Input } from "~/components/ui/input";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const user = context.get(userContext);
@@ -59,9 +67,164 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
     familyGroupDetail,
     members,
     memorialContent
-  } = loaderData
+  } = loaderData;
+
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    navigate(-1);
+  };
 
   return (
-    <></>
+    <div className="max-w-7xl mx-auto min-h-[calc(100vh-398px)] px-4 sm:px-6 lg:px-8 py-12">
+      <FlexDiv
+        className="items-center cursor-pointer"
+        onClick={handleBack}
+      >
+        <Button variant="ghost">
+          <ArrowLeftIcon size={16} />
+        </Button>
+        그룹 목록으로
+      </FlexDiv>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FlexDiv className="flex-col gap-y-6">
+          <Card className="p-6">
+            <div className="w-16 h-16 bg-linear-to-br from-purple-600 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <Users className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-2xl text-center mb-2">{familyGroupDetail.name}</h2>
+            <p className="text-gray-600 text-center text-sm mb-6">{familyGroupDetail.description}</p>
+
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">멤버</span>
+                <span>{members.length}명</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">추모관</span>
+                <span>{memorialContent.length}개</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">생성일</span>
+                <span>{moment(familyGroupDetail.createdAt).format('YYYY-MM-DD HH:mm:ss')}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">내 권한</span>
+                <span>{user.id === familyGroupDetail.ownerId ? '관리자' : '멤버'}</span>
+              </div>
+            </div>
+
+            {/* {user.id === familyGroupDetail.ownerId && (
+              <div className="mt-6 pt-6 border-t space-y-2">
+                <Dialog
+                  open={isInviteDialogOpen}
+                  onOpenChange={setIsInviteDialogOpen}
+                >
+                  <DialogTrigger asChild>
+                    <Button className="w-full">
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      멤버 초대
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>멤버 초대</DialogTitle>
+                      <DialogDescription>
+                        초대할 사용자의 이메일을 입력하세요
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="invite-email">이메일</Label>
+                        <Input
+                          id="invite-email"
+                          type="email"
+                          placeholder="example@email.com"
+                          value={inviteEmail}
+                          onChange={(e) => setInviteEmail(e.target.value)}
+                        />
+                      </div>
+                      <div className="flex justify-end gap-3">
+                        <Button onClick={handleInviteMember}>
+                          초대
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsInviteDialogOpen(false)}
+                        >
+                          취소
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                <Button
+                  variant="destructive"
+                  className="w-full"
+                  onClick={() => setIsDeleteGroupDialogOpen(true)}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  그룹 삭제
+                </Button>
+              </div>
+            )} */}
+          </Card>
+          <Card className="p-6">
+            <h3 className="text-xl mb-6">그룹 멤버</h3>
+            <div className="space-y-4">
+              {members.map(member => (
+                <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <p className="flex items-center gap-2">
+                        {member.user.name}
+                        {member.role === 'admin' && (
+                          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">관리자</span>
+                        )}
+                      </p>
+                      <p className="text-sm text-gray-600">{member.user.email}</p>
+                      <p className="text-xs text-gray-500">
+                        {/* 가입일: {member.user.toLocaleDateString('ko-KR')} */}
+                      </p>
+                    </div>
+                  </div>
+
+                  {user.id === familyGroupDetail.ownerId && (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      // onClick={() => handleSelectedDeleteMember(member.user)}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Card>
+        </FlexDiv>
+        {memorialContent.length > 0 ? (
+          <FlexDiv className="flex-col gap-y-6">
+            {memorialContent.map(memorial => (
+              <Card key={memorial.id}>
+                <h3 className="text-xl mb-6">추모관 목록</h3>
+              </Card>
+            ))}
+          </FlexDiv>
+        ) : (
+          <FlexDiv className="flex-col w-full h-full justify-center items-center gap-y-4">
+            <FlexDiv className="flex-col justify-center items-center gap-y-2">
+              <StickyNoteOff size={128} />
+              등록된 추모관이 없습니다
+            </FlexDiv>
+            <Button>
+              <PlusIcon size={24} />
+              새 추모관 등록
+            </Button>
+          </FlexDiv>
+        )}
+      </div>
+    </div>
   )
 }
