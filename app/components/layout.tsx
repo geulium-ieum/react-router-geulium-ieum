@@ -13,7 +13,7 @@ export default function RootLayout({ loaderData }: Route.ComponentProps) {
     const { pathname } = loaderData;
     
     return (
-        <div className={cn("bg-gray-50", pathname === "/guides" ? "h-dvh" : "h-[calc(100dvh-73px)]")}>
+        <div className={cn("bg-gray-50", pathname === "/guides" ? "h-dvh" : "min-h-[calc(100dvh-73px)]")}>
             <main className="h-full">
                 <Outlet />
             </main>
