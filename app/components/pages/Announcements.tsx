@@ -10,11 +10,12 @@ import type { User as UserType } from '~/types';
 import { toast } from 'sonner';
 import { Footer } from '~/components/organisms/Footer';
 import { Switch } from '~/components/ui/switch';
-import { Link } from 'react-router';
-
-interface AnnouncementsProps {
-  user: UserType | null;
-}
+import { Link, useRouteLoaderData } from 'react-router';
+import type { Route } from './+types/Announcements';
+import { userService } from '~/lib/services/user';
+import type { Route as RootRoute } from "../../+types/root";
+import { getSession } from '~/lib/sessions.server';
+import { userContext } from "~/context/userContext";
 
 interface Announcement {
   id: string;
@@ -25,36 +26,29 @@ interface Announcement {
   author: string;
 }
 
-export default function Announcements({ user }: AnnouncementsProps) {
+export async function action({ request, context }: Route.LoaderArgs){
+    const user = context.get(userContext);
+    const cookie = request.headers.get("Cookie");
+    const session = await getSession(cookie);
+    const token = session.get("token");
+    const formData = await request.formData();
+    const title = formData.get('title') as string;
+}
+
+export async function loader() {
+    const response = await userService.get.announcementList();
+    const announcements = Array.isArray(response)
+      ? response
+      : (response as { content?: unknown[] }).content ?? [];
+    return { announcements };
+  }
+
+export default function Announcements({ loaderData }: Route.ComponentProps) {
+  const { announcements } = loaderData;
+  const { user } = useRouteLoaderData("root") as RootRoute.ComponentProps["loaderData"];
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 
-  const [announcements, setAnnouncements] = useState<Announcement[]>([
-    {
-      id: '1',
-      title: '추석 연휴 안내',
-      content: '추석 연휴 기간(9월 16일~18일) 동안 온라인 추모 서비스는 정상 운영됩니다. 다만, 고객센터 운영은 휴무이니 참고 부탁드립니다.',
-      createdDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-      isPinned: true,
-      author: '관리자',
-    },
-    {
-      id: '2',
-      title: '새로운 기능 업데이트 안내',
-      content: '가족 그룹 기능이 새롭게 추가되었습니다. 이제 가족 구성원들과 함께 추모관을 관리하고 추억을 공유할 수 있습니다.',
-      createdDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-      isPinned: false,
-      author: '관리자',
-    },
-    {
-      id: '3',
-      title: '서비스 이용 안내',
-      content: '그리움 이음 서비스를 이용해 주셔서 감사합니다. 서비스 이용 중 문의사항이 있으시면 고객센터로 연락 부탁드립니다.',
-      createdDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
-      isPinned: false,
-      author: '관리자',
-    },
-  ]);
-
+  const [announcementsState, setAnnouncementsState] = useState<Announcement[]>(announcements ?? []);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -77,7 +71,7 @@ export default function Announcements({ user }: AnnouncementsProps) {
       author: user?.name || '관리자',
     };
 
-    setAnnouncements([newAnnouncement, ...announcements]);
+    setAnnouncementsState([newAnnouncement, ...announcementsState]);
     setNewTitle('');
     setNewContent('');
     setNewIsPinned(false);
@@ -88,7 +82,7 @@ export default function Announcements({ user }: AnnouncementsProps) {
   const handleEditAnnouncement = () => {
     if (!selectedAnnouncement) return;
 
-    setAnnouncements(announcements.map(a => 
+    setAnnouncementsState(announcementsState.map(a => 
       a.id === selectedAnnouncement.id 
         ? { ...a, title: newTitle, content: newContent, isPinned: newIsPinned }
         : a
@@ -104,7 +98,7 @@ export default function Announcements({ user }: AnnouncementsProps) {
 
   const handleDeleteAnnouncement = (id: string) => {
     if (confirm('이 공지사항을 삭제하시겠습니까?')) {
-      setAnnouncements(announcements.filter(a => a.id !== id));
+      setAnnouncementsState(announcementsState.filter(a => a.id !== id));
       toast.success('공지사항이 삭제되었습니다');
     }
   };
@@ -117,7 +111,7 @@ export default function Announcements({ user }: AnnouncementsProps) {
     setIsEditDialogOpen(true);
   };
 
-  const sortedAnnouncements = [...announcements].sort((a, b) => {
+  const sortedAnnouncements = [...announcementsState].sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1;
     if (!a.isPinned && b.isPinned) return 1;
     return b.createdDate.getTime() - a.createdDate.getTime();
@@ -246,7 +240,7 @@ export default function Announcements({ user }: AnnouncementsProps) {
             </Card>
           ))}
 
-          {announcements.length === 0 && (
+          {announcementsState.length === 0 && (
             <div className="text-center py-12">
               <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FileText className="w-10 h-10 text-gray-400" />

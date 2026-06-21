@@ -120,6 +120,12 @@ export interface PostKakaoLoginParams {
   redirectUri: string;
 }
 
+export interface PostWriteAnnouncementParams {
+  title: string,
+  content: string,
+  isPinned: boolean,
+}
+
 export interface GetNotificationListParams {
   id: number;
   userId: number;
@@ -157,4 +163,16 @@ export interface PutUserProfileParams {
 
 export interface DeleteUserParams {
   userId: string;
+}
+
+export interface GetAnnouncementListParams {
+  id: number;
+  title: string;
+  content: string;
+  authorId: number;
+  isPinned: boolean;
+  isPublished: boolean;
+  publishedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }

@@ -1,7 +1,7 @@
 import { http } from "~/lib/utils"
 import * as v from 'valibot';
 import { TokenSchema, UserSchema } from "~/constants/user";
-import type { PostLoginParams, PostRegisterParams, PostVerifyEmailParams, PostChangePasswordParams, PostVerifyChangePasswordParams, PostNaverLoginParams, PostKakaoLoginParams, ListParams, PutUserProfileParams, DeleteUserParams } from "~/types";
+import type { PostLoginParams, PostRegisterParams, PostVerifyEmailParams, PostChangePasswordParams, PostVerifyChangePasswordParams, PostNaverLoginParams, PostKakaoLoginParams, PostWriteAnnouncementParams, ListParams, PutUserProfileParams, DeleteUserParams } from "~/types";
 import { tributeListSchema } from "~/constants/tribute";
 import { MemorialSchema } from "~/constants/memorial";
 
@@ -157,6 +157,21 @@ export async function postKakaoLogin({
     }
 }
 
+export async function postWriteAnnouncement({
+    title,
+    content,
+    isPinned
+}: PostWriteAnnouncementParams) {
+    try {
+        const response = await http.post('admin/announcement', {
+            json: { title, content, isPinned }
+        }).json();
+        return v.parse(TokenSchema, response);
+    } catch (error) {
+        throw error;
+    }
+}
+
 export async function getUserNotificationList({
     token
 }: {
@@ -209,6 +224,15 @@ export async function getMemorialList({
         throw error;
     }
 }
+
+export async function getAnnouncementList() {
+    try {
+      const response = await http.get('announcement/list').json();
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
 
 export async function putUserProfile({
     name,
