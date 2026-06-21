@@ -31,7 +31,7 @@ export default function RegisterMemorialHallDialog({
   
   const navigate = useNavigate();
 
-  const handleRegisterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleRegisterSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!token) {
       toast.error("로그인이 필요합니다.");

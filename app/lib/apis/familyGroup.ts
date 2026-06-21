@@ -172,6 +172,29 @@ export async function postCreateFamilyGroup({
   }
 }
 
+export async function postAddMemorialToFamilyGroup({
+  token,
+  id,
+  memorialId
+}: {
+  token: string;
+  id: string;
+  memorialId: string;
+}) {
+  try {
+    await http.post(`family-group/${id}/memorial`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      json: {
+        memorialId
+      }
+    })
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function deleteFamilyGroup({
   id,
   token

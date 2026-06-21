@@ -312,6 +312,7 @@ export default function SearchDeceased({
         token={token}
         isOpen={isRegisterDialogOpen}
         setIsOpen={setIsRegisterDialogOpen}
+        path="search"
       />
 
       <Footer />
