@@ -12,6 +12,8 @@ import moment from "moment";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
+import { useState } from "react";
+import RegisterMemorialHallDialog from "~/components/organisms/RegisterMemorialHallDialog";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const user = context.get(userContext);
@@ -68,6 +70,10 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
     members,
     memorialContent
   } = loaderData;
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState<boolean>(false);
+  const [inviteEmail, setInviteEmail] = useState<string>("");
+  const [isDeleteGroupDialogOpen, setIsDeleteGroupDialogOpen] = useState<boolean>(false);
+  const [isAddMemorialOpen, setIsAddMemorialOpen] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -78,7 +84,7 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
   return (
     <div className="max-w-7xl mx-auto min-h-[calc(100vh-398px)] px-4 sm:px-6 lg:px-8 py-12">
       <FlexDiv
-        className="items-center cursor-pointer"
+        className="items-center cursor-pointer mb-2"
         onClick={handleBack}
       >
         <Button variant="ghost">
@@ -114,7 +120,7 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
               </div>
             </div>
 
-            {/* {user.id === familyGroupDetail.ownerId && (
+            {user.id === familyGroupDetail.ownerId && (
               <div className="mt-6 pt-6 border-t space-y-2">
                 <Dialog
                   open={isInviteDialogOpen}
@@ -145,7 +151,9 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
                         />
                       </div>
                       <div className="flex justify-end gap-3">
-                        <Button onClick={handleInviteMember}>
+                        <Button
+                          // onClick={handleInviteMember}
+                        >
                           초대
                         </Button>
                         <Button
@@ -168,7 +176,7 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
                   그룹 삭제
                 </Button>
               </div>
-            )} */}
+            )}
           </Card>
           <Card className="p-6">
             <h3 className="text-xl mb-6">그룹 멤버</h3>
@@ -194,7 +202,7 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
                     <Button
                       size="sm"
                       variant="destructive"
-                      // onClick={() => handleSelectedDeleteMember(member.user)}
+                    // onClick={() => handleSelectedDeleteMember(member.user)}
                     >
                       <Trash2 className="size-4" />
                     </Button>
@@ -204,27 +212,61 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
             </div>
           </Card>
         </FlexDiv>
-        {memorialContent.length > 0 ? (
-          <FlexDiv className="flex-col gap-y-6">
-            {memorialContent.map(memorial => (
-              <Card key={memorial.id}>
-                <h3 className="text-xl mb-6">추모관 목록</h3>
-              </Card>
-            ))}
-          </FlexDiv>
-        ) : (
-          <FlexDiv className="flex-col w-full h-full justify-center items-center gap-y-4">
-            <FlexDiv className="flex-col justify-center items-center gap-y-2">
-              <StickyNoteOff size={128} />
-              등록된 추모관이 없습니다
+        <Card className="p-6">
+          <h3 className="text-xl mb-6">추모관</h3>
+          {memorialContent.length > 0 ? (
+            <FlexDiv className="flex-col gap-y-6">
+              {memorialContent.map(memorial => (
+                <Card key={memorial.id}>
+                  <h3 className="text-xl mb-6">추모관 목록</h3>
+                </Card>
+              ))}
             </FlexDiv>
-            <Button>
-              <PlusIcon size={24} />
-              새 추모관 등록
-            </Button>
-          </FlexDiv>
-        )}
+          ) : (
+            <FlexDiv className="flex-col w-full h-full justify-center items-center gap-y-4">
+              <FlexDiv className="flex-col justify-center items-center gap-y-2">
+                <StickyNoteOff size={128} />
+                등록된 추모관이 없습니다
+              </FlexDiv>
+              {familyGroupDetail.ownerId === user.id && (
+                <Button onClick={() => setIsAddMemorialOpen(true)}>
+                  <PlusIcon size={24} />
+                  새 추모관 등록
+                </Button>
+              )}
+            </FlexDiv>
+          )}
+        </Card>
       </div>
+      <Dialog open={isDeleteGroupDialogOpen} onOpenChange={setIsDeleteGroupDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>그룹 삭제</DialogTitle>
+            <DialogDescription>
+              정말 이 그룹을 삭제하시겠습니까?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="destructive"
+              // onClick={handleDeleteGroup}
+            >
+              삭제
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteGroupDialogOpen(false)}
+            >
+              취소
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <RegisterMemorialHallDialog
+        token={token}
+        isOpen={isAddMemorialOpen}
+        setIsOpen={setIsAddMemorialOpen}
+      />
     </div>
   )
 }
