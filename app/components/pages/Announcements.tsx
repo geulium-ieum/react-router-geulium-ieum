@@ -50,7 +50,6 @@ export async function loader() {
   const announcements = Array.isArray(response)
     ? response
     : ((response as { content?: unknown[] }).content ?? []);
-  console.log(response);
   return { announcements };
 }
 
