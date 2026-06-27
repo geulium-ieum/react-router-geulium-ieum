@@ -4,7 +4,7 @@ import { getSession } from "~/lib/sessions.server";
 import { Form, Link, redirect } from "react-router";
 import { familyGroupService } from "~/lib/services/familyGroup";
 import { toast } from "sonner";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../../ui/dialog";
 import { Button } from "../../ui/button";
 import { Plus, Settings, Users } from "lucide-react";
@@ -49,20 +49,35 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     })
   )
 
-  return { user, memberContent, memorialContent };
+  return {
+    user,
+    token,
+    memberContent,
+    memorialContent
+  };
 }
 
 export default function FamilyGroup({ loaderData }: Route.ComponentProps) {
-  const { user, memberContent, memorialContent } = loaderData;
+  const { user, token, memberContent, memorialContent } = loaderData;
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupDescription, setNewGroupDescription] = useState('');
 
-  const handleCreateGroup = async () => {
+  const handleCreateGroup = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if (!newGroupName.trim()) {
       toast.error('그룹 이름을 입력해주세요');
       return;
+    }
+    try {
+      await familyGroupService.post.createFamilyGroup({
+        token,
+        name: newGroupName,
+        description: newGroupDescription
+      });
+    } catch (error) {
+      toast.error('그룹 생성에 실패했습니다.');
     }
     setNewGroupName('');
     setNewGroupDescription('');
@@ -77,7 +92,6 @@ export default function FamilyGroup({ loaderData }: Route.ComponentProps) {
           <h1 className="text-3xl text-gray-900 mb-2">가족 그룹</h1>
           <p className="text-gray-600">가족 구성원과 함께 추억을 공유하세요</p>
         </div>
-        
         {memberContent.length > 0 && (
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>

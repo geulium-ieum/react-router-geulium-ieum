@@ -5,7 +5,7 @@ import { redirect, useNavigate } from "react-router";
 import { familyGroupService } from "~/lib/services/familyGroup";
 import { userService } from "~/lib/services/user";
 import { Button } from "~/components/ui/button";
-import { ArrowLeftIcon, PlusIcon, StickyNoteOff, Trash2, UserPlus, Users } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, StickyNoteOff, Trash2, UserPlus, UserRoundX, Users } from "lucide-react";
 import FlexDiv from "~/components/FlexDiv";
 import { Card } from "~/components/ui/card";
 import moment from "moment";
@@ -14,6 +14,8 @@ import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { useState } from "react";
 import RegisterMemorialHallDialog from "~/components/organisms/RegisterMemorialHallDialog";
+import { toast } from "sonner";
+import type { FamilyGroupMember, User } from "~/types";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const user = context.get(userContext);
@@ -54,6 +56,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   });
 
   return {
+    id,
     user,
     token,
     familyGroupDetail,
@@ -64,6 +67,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
 export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) {
   const {
+    id,
     user,
     token,
     familyGroupDetail,
@@ -72,6 +76,8 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
   } = loaderData;
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState<boolean>(false);
   const [inviteEmail, setInviteEmail] = useState<string>("");
+  const [inviteRole, setInviteRole] = useState<"member" | "admin">("member");
+  const [inviteRelationship, setInviteRelationship] = useState<string>("");
   const [isDeleteGroupDialogOpen, setIsDeleteGroupDialogOpen] = useState<boolean>(false);
   const [isAddMemorialOpen, setIsAddMemorialOpen] = useState<boolean>(false);
 
@@ -80,6 +86,44 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
   const handleBack = () => {
     navigate(-1);
   };
+
+  const handleSelectedDeleteMember = async (member: FamilyGroupMember) => {
+    const { id, userId } = member;
+    try {
+      await familyGroupService.delete.familyGroupMember({
+        token,
+        id,
+        userId
+      });
+    } catch (error) {
+      toast.error("멤버 제거에 실패했습니다.");
+    }
+  };
+
+  const handleInviteMember = async () => {
+    try {
+      await familyGroupService.post.inviteFamilyGroupMember({
+        id,
+        token,
+        email: inviteEmail,
+        role: inviteRole,
+        relationship: inviteRelationship
+      });
+    } catch (error) {
+      toast.error("멤버 초대에 실패했습니다.");
+    }
+  };
+
+  const handleDeleteGroup = async () => {
+    try {
+      await familyGroupService.delete.familyGroup({
+        id,
+        token
+      });
+    } catch (error) {
+      toast.error("그룹 제거에 실패했습니다.");
+    }
+  }
 
   return (
     <div className="max-w-7xl mx-auto min-h-[calc(100vh-398px)] px-4 sm:px-6 lg:px-8 py-12">
@@ -92,7 +136,7 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
         </Button>
         그룹 목록으로
       </FlexDiv>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <FlexDiv className="flex-col gap-y-6">
           <Card className="p-6">
             <div className="w-16 h-16 bg-linear-to-br from-purple-600 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -119,69 +163,11 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
                 <span>{user.id === familyGroupDetail.ownerId ? '관리자' : '멤버'}</span>
               </div>
             </div>
-
-            {user.id === familyGroupDetail.ownerId && (
-              <div className="mt-6 pt-6 border-t space-y-2">
-                <Dialog
-                  open={isInviteDialogOpen}
-                  onOpenChange={setIsInviteDialogOpen}
-                >
-                  <DialogTrigger asChild>
-                    <Button className="w-full">
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      멤버 초대
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>멤버 초대</DialogTitle>
-                      <DialogDescription>
-                        초대할 사용자의 이메일을 입력하세요
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="invite-email">이메일</Label>
-                        <Input
-                          id="invite-email"
-                          type="email"
-                          placeholder="example@email.com"
-                          value={inviteEmail}
-                          onChange={(e) => setInviteEmail(e.target.value)}
-                        />
-                      </div>
-                      <div className="flex justify-end gap-3">
-                        <Button
-                          // onClick={handleInviteMember}
-                        >
-                          초대
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => setIsInviteDialogOpen(false)}
-                        >
-                          취소
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-
-                <Button
-                  variant="destructive"
-                  className="w-full"
-                  onClick={() => setIsDeleteGroupDialogOpen(true)}
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  그룹 삭제
-                </Button>
-              </div>
-            )}
           </Card>
           <Card className="p-6">
             <h3 className="text-xl mb-6">그룹 멤버</h3>
             <div className="space-y-4">
-              {members.map(member => (
+              {members.length > 0 ? members.map(member => (
                 <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-4">
                     <div>
@@ -202,13 +188,79 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
                     <Button
                       size="sm"
                       variant="destructive"
-                    // onClick={() => handleSelectedDeleteMember(member.user)}
+                      onClick={() => handleSelectedDeleteMember(member)}
                     >
                       <Trash2 className="size-4" />
                     </Button>
                   )}
                 </div>
-              ))}
+              )) : (
+                <FlexDiv className="flex-col w-full h-full justify-center items-center gap-y-4">
+                  <FlexDiv className="flex-col justify-center items-center gap-y-2">
+                    <UserRoundX size={128} />
+                    등록된 멤버가 없습니다
+                  </FlexDiv>
+                  {familyGroupDetail.ownerId === user.id && (
+                    <Dialog
+                      open={isInviteDialogOpen}
+                      onOpenChange={setIsInviteDialogOpen}
+                    >
+                      <DialogTrigger asChild>
+                        <Button>
+                          <PlusIcon size={24} />
+                          멤버 초대
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>멤버 초대</DialogTitle>
+                          <DialogDescription>
+                            초대할 사용자의 이메일을 입력하세요
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="invite-email">이메일</Label>
+                            <Input
+                              id="invite-email"
+                              type="email"
+                              placeholder="example@email.com"
+                              value={inviteEmail}
+                              onChange={(e) => setInviteEmail(e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="invite-email">권한</Label>
+                            {/* TODO: SelectBox 추가 */}
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="invite-relationship">관계</Label>
+                            <FlexDiv className="items-center gap-x-2">
+                              <Input
+                                id="invite-relationship"
+                                value={inviteRelationship}
+                                onChange={(e) => setInviteRelationship(e.target.value)}
+                              />
+                              {/* TODO: SelectBox 추가 */}
+                            </FlexDiv>
+                          </div>
+                          <div className="flex justify-end gap-3">
+                            <Button onClick={handleInviteMember}>
+                              초대
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => setIsInviteDialogOpen(false)}
+                            >
+                              취소
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </FlexDiv>
+              )}
             </div>
           </Card>
         </FlexDiv>
@@ -238,30 +290,40 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
           )}
         </Card>
       </div>
-      <Dialog open={isDeleteGroupDialogOpen} onOpenChange={setIsDeleteGroupDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>그룹 삭제</DialogTitle>
-            <DialogDescription>
-              정말 이 그룹을 삭제하시겠습니까?
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-3">
-            <Button
-              variant="destructive"
-              // onClick={handleDeleteGroup}
-            >
-              삭제
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteGroupDialogOpen(false)}
-            >
-              취소
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {user.id === familyGroupDetail.ownerId && (
+        <FlexDiv className="justify-end">
+          <Dialog open={isDeleteGroupDialogOpen} onOpenChange={setIsDeleteGroupDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="destructive">
+                <Trash2 className="w-4 h-4 mr-2" />
+                그룹 삭제
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>그룹 삭제</DialogTitle>
+                <DialogDescription>
+                  정말 이 그룹을 삭제하시겠습니까?
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteGroup}
+                >
+                  삭제
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDeleteGroupDialogOpen(false)}
+                >
+                  취소
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </FlexDiv>
+      )}
       <RegisterMemorialHallDialog
         token={token}
         isOpen={isAddMemorialOpen}
