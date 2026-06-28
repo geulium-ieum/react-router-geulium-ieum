@@ -16,6 +16,12 @@ import { useState } from "react";
 import RegisterMemorialHallDialog from "~/components/organisms/RegisterMemorialHallDialog";
 import { toast } from "sonner";
 import type { FamilyGroupMember, User } from "~/types";
+import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "~/components/ui/combobox";
+
+interface MemberRole {
+  value: FamilyGroupMember["role"]
+  label: string
+}
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const user = context.get(userContext);
@@ -65,6 +71,17 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   };
 }
 
+const memberRoles: MemberRole[] = [
+  {
+    value: "member",
+    label: "일반"
+  },
+  {
+    value: "admin",
+    label: "관리자"
+  }
+];
+
 export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) {
   const {
     id,
@@ -76,7 +93,7 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
   } = loaderData;
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState<boolean>(false);
   const [inviteEmail, setInviteEmail] = useState<string>("");
-  const [inviteRole, setInviteRole] = useState<"member" | "admin">("member");
+  const [inviteRole, setInviteRole] = useState<FamilyGroupMember["role"]>("member");
   const [inviteRelationship, setInviteRelationship] = useState<string>("");
   const [isDeleteGroupDialogOpen, setIsDeleteGroupDialogOpen] = useState<boolean>(false);
   const [isAddMemorialOpen, setIsAddMemorialOpen] = useState<boolean>(false);
@@ -230,18 +247,35 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="invite-email">권한</Label>
-                            {/* TODO: SelectBox 추가 */}
+                            <Label>권한</Label>
+                            <Combobox
+                              items={memberRoles}
+                              itemToStringValue={(role: MemberRole) => role.label}
+                              // value={inviteRole}
+                              onValueChange={(e) => setInviteRole(e!.value)}
+                            >
+                              <ComboboxInput placeholder="부여할 권한을 선택해주세요" />
+                              <ComboboxContent>
+                                <ComboboxEmpty>검색 결과가 없습니다</ComboboxEmpty>
+                                <ComboboxList>
+                                  {(role) => (
+                                    <ComboboxItem key={role.value} value={role}>
+                                      {role.label}
+                                    </ComboboxItem>
+                                  )}
+                                </ComboboxList>
+                              </ComboboxContent>
+                            </Combobox>
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="invite-relationship">관계</Label>
                             <FlexDiv className="items-center gap-x-2">
                               <Input
                                 id="invite-relationship"
+                                placeholder="예시) 부"
                                 value={inviteRelationship}
                                 onChange={(e) => setInviteRelationship(e.target.value)}
                               />
-                              {/* TODO: SelectBox 추가 */}
                             </FlexDiv>
                           </div>
                           <div className="flex justify-end gap-3">
