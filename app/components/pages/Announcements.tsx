@@ -97,37 +97,44 @@ export default function Announcements({ loaderData }: Route.ComponentProps) {
         {/* Announcements List */}
         <div className="space-y-4">
           {sortedAnnouncements.map((announcement) => (
-            <Card
+            <Link
               key={announcement.id}
-              className={`p-6 hover:shadow-md transition-shadow ${announcement.isPinned ? "border-l-4 border-l-purple-500" : ""}`}
+              to={`/announcements/${announcement.id}`}
+              state={{ announcements: announcementsState }}
+              className="block"
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    {announcement.isPinned && (
-                      <Pin className="w-4 h-4 text-purple-600" />
-                    )}
-                    <Link
-                      to={`/announcements/${announcement.id}`}
-                      className="hover: cursor-pointer"
-                      state={{ announcements }}
-                    >
-                      <h2 className="text-xl">{announcement.title}</h2>
-                    </Link>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      {new Date(announcement.createdAt).toLocaleDateString(
-                        "ko-KR",
+              <Card
+                key={announcement.id}
+                className={`p-6 hover:shadow-md transition-shadow ${announcement.isPinned ? "border-l-4 border-l-purple-500" : ""}`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      {announcement.isPinned && (
+                        <Pin className="w-4 h-4 text-purple-600" />
                       )}
-                    </span>
-                    <span>•</span>
-                    {/* <span>{announcement.authorId}</span> */}
+                      <Link
+                        to={`/announcements/${announcement.id}`}
+                        className="hover: cursor-pointer"
+                        state={{ announcements }}
+                      >
+                        <h2 className="text-xl">{announcement.title}</h2>
+                      </Link>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        {new Date(announcement.createdAt).toLocaleDateString(
+                          "ko-KR",
+                        )}
+                      </span>
+                      <span>•</span>
+                      {/* <span>{announcement.authorId}</span> */}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            </Link>
           ))}
 
           {announcementsState.length === 0 && (
