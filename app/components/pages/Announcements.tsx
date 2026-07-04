@@ -23,6 +23,7 @@ import { userService } from "~/lib/services/user";
 import type { Route as RootRoute } from "../../+types/root";
 import { getSession } from "~/lib/sessions.server";
 import { userContext } from "~/context/userContext";
+import moment from "moment";
 
 interface Announcement {
   id: string;
@@ -34,6 +35,7 @@ interface Announcement {
   createdAt: string;
   updatedAt: string;
   isPinned: boolean;
+  authorName: string;
 }
 
 export async function action({ request, context }: Route.LoaderArgs) {
@@ -124,11 +126,11 @@ export default function Announcements({ loaderData }: Route.ComponentProps) {
                     <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
                       <span className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
-                        {new Date(announcement.createdAt).toLocaleDateString(
-                          "ko-KR",
+                        {moment(announcement.createdAt).format(
+                          "YY-MM-DD HH:mm",
                         )}
                       </span>
-                      <span>•</span>
+                      <span>{announcement.authorName}</span>
                       {/* <span>{announcement.authorId}</span> */}
                     </div>
                   </div>
