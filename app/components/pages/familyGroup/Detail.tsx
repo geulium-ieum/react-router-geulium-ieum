@@ -20,7 +20,7 @@ import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, 
 
 interface MemberRole {
   value: FamilyGroupMember["role"]
-  label: string
+  label: "일반" | "관리자" | ""
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
@@ -93,7 +93,7 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
   } = loaderData;
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState<boolean>(false);
   const [inviteEmail, setInviteEmail] = useState<string>("");
-  const [inviteRole, setInviteRole] = useState<FamilyGroupMember["role"]>("member");
+  const [inviteRole, setInviteRole] = useState<MemberRole["label"]>("");
   const [inviteRelationship, setInviteRelationship] = useState<string>("");
   const [isDeleteGroupDialogOpen, setIsDeleteGroupDialogOpen] = useState<boolean>(false);
   const [isAddMemorialOpen, setIsAddMemorialOpen] = useState<boolean>(false);
@@ -104,6 +104,7 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
     navigate(-1);
   };
 
+  // TODO: 확인 필요
   const handleSelectedDeleteMember = async (member: FamilyGroupMember) => {
     const { id, userId } = member;
     try {
@@ -123,12 +124,24 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
         id,
         token,
         email: inviteEmail,
-        role: inviteRole,
+        role: inviteRole === "일반" ? "member" : "admin",
         relationship: inviteRelationship
       });
+      setIsInviteDialogOpen(false);
+      setInviteEmail("");
+      setInviteRole("");
+      setInviteRelationship("");
+      toast.success("멤버를 초대했습니다");
     } catch (error) {
       toast.error("멤버 초대에 실패했습니다.");
     }
+  };
+
+  const handleInviteCancel = () => {
+    setIsInviteDialogOpen(false);
+    setInviteEmail("");
+    setInviteRole("");
+    setInviteRelationship("");
   };
 
   const handleDeleteGroup = async () => {
@@ -137,6 +150,8 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
         id,
         token
       });
+      toast.success("그룹을 삭제했습니다");
+      navigate("/family-groups", { replace: true });
     } catch (error) {
       toast.error("그룹 제거에 실패했습니다.");
     }
@@ -251,15 +266,14 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
                             <Combobox
                               items={memberRoles}
                               itemToStringValue={(role: MemberRole) => role.label}
-                              // value={inviteRole}
-                              onValueChange={(e) => setInviteRole(e!.value)}
+                              onInputValueChange={(e) => setInviteRole(e as MemberRole["label"])}
                             >
                               <ComboboxInput placeholder="부여할 권한을 선택해주세요" />
-                              <ComboboxContent>
+                              <ComboboxContent className="pointer-events-auto">
                                 <ComboboxEmpty>검색 결과가 없습니다</ComboboxEmpty>
                                 <ComboboxList>
                                   {(role) => (
-                                    <ComboboxItem key={role.value} value={role}>
+                                    <ComboboxItem key={role.value} value={role.label}>
                                       {role.label}
                                     </ComboboxItem>
                                   )}
@@ -284,7 +298,7 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
                             </Button>
                             <Button
                               variant="outline"
-                              onClick={() => setIsInviteDialogOpen(false)}
+                              onClick={handleInviteCancel}
                             >
                               취소
                             </Button>
