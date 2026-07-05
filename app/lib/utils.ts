@@ -1,13 +1,13 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-import ky from 'ky'
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+import ky from "ky";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export const http = ky.create({
-  prefix: import.meta.env.VITE_API_URL
+  prefix: import.meta.env.VITE_API_URL,
 });
 
 export function updatedTime(time: string) {
@@ -24,7 +24,11 @@ export function updatedTime(time: string) {
   } else if (diffInDays < 7) {
     return `${diffInDays}일 전`;
   } else {
-    return updatedTime.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+    return updatedTime.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   }
 }
 
@@ -33,4 +37,37 @@ export function calculateAge(birthDate: string) {
   const birthDateObj = new Date(birthDate);
   const age = now.getFullYear() - birthDateObj.getFullYear() - 1;
   return age;
+}
+
+export function formatNoticeDate(dateInput: string | Date): string {
+  const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+  const now = new Date();
+
+  const isToday =
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate();
+
+  if (isToday) {
+    const diffMs = now.getTime() - date.getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+
+    if (diffSec < 60) return "방금 전";
+    if (diffMin < 60) return `${diffMin}분 전`;
+    return `${diffHour}시간 전`;
+  }
+
+  const yy = String(date.getFullYear()).slice(-2); // 끝자리 2개
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yy}.${mm}.${dd}`;
+}
+
+// components/Pagination.tsx
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }

@@ -3,7 +3,7 @@ import { useParams } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import type { Route } from "./+types/AnnouncementsDetail";
 import { Button } from "~/components/ui/button";
-import moment from "moment";
+import { formatNoticeDate } from "~/lib/utils";
 
 interface Announcement {
   id: string;
@@ -73,7 +73,7 @@ export default function AnnouncementsDetail() {
             <div className="justify-end">
               <p className="text-gray-700">{announcement.authorName}</p>
               <p className="text-gray-700">
-                {moment(announcement.createdAt).format("YY-MM-DD HH-mm")}
+                {formatNoticeDate(announcement.createdAt)}
               </p>
             </div>
           </CardHeader>
