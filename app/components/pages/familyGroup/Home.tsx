@@ -7,10 +7,11 @@ import { toast } from "sonner";
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../../ui/dialog";
 import { Button } from "../../ui/button";
-import { Plus, Settings, Users } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
 import { Card } from "../../ui/card";
+import { Badge } from "~/components/ui/badge";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const user = context.get(userContext);
@@ -157,16 +158,9 @@ export default function FamilyGroup({ loaderData }: Route.ComponentProps) {
                   <Users className="w-6 h-6 text-white" />
                 </div>
                 {group.ownerId === user?.id && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // setSelectedGroup(group);
-                    }}
-                  >
-                    <Settings className="w-4 h-4" />
-                  </Button>
+                  <Badge className="bg-green-100 text-green-600 rounded-full">
+                    관리자
+                  </Badge>
                 )}
               </div>
               
