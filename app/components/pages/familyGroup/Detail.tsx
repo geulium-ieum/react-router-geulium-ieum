@@ -5,7 +5,7 @@ import { redirect, useNavigate } from "react-router";
 import { familyGroupService } from "~/lib/services/familyGroup";
 import { userService } from "~/lib/services/user";
 import { Button } from "~/components/ui/button";
-import { ArrowLeftIcon, PlusIcon, StickyNoteOff, Trash2, UserPlus, UserRoundX, Users } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, StickyNoteOff, Trash2, UserRoundX, Users } from "lucide-react";
 import FlexDiv from "~/components/FlexDiv";
 import { Card } from "~/components/ui/card";
 import moment from "moment";
@@ -17,6 +17,7 @@ import RegisterMemorialHallDialog from "~/components/organisms/RegisterMemorialH
 import { toast } from "sonner";
 import type { FamilyGroupMember, User } from "~/types";
 import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "~/components/ui/combobox";
+import { useRevalidator } from "react-router";
 
 interface MemberRole {
   value: FamilyGroupMember["role"]
@@ -95,8 +96,11 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
   const [inviteEmail, setInviteEmail] = useState<string>("");
   const [inviteRole, setInviteRole] = useState<MemberRole["label"]>("");
   const [inviteRelationship, setInviteRelationship] = useState<string>("");
+  const [isDeleteMemberDialogOpen, setIsDeleteMemberDialogOpen] = useState<boolean>(false);
   const [isDeleteGroupDialogOpen, setIsDeleteGroupDialogOpen] = useState<boolean>(false);
   const [isAddMemorialOpen, setIsAddMemorialOpen] = useState<boolean>(false);
+
+  const revalidator = useRevalidator();
 
   const navigate = useNavigate();
 
@@ -104,15 +108,17 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
     navigate(-1);
   };
 
-  // TODO: 확인 필요
   const handleSelectedDeleteMember = async (member: FamilyGroupMember) => {
-    const { id, userId } = member;
+    const { userId } = member;
     try {
       await familyGroupService.delete.familyGroupMember({
         token,
         id,
         userId
       });
+      revalidator.revalidate();
+      setIsDeleteMemberDialogOpen(false);
+      toast.success("멤버를 제거했습니다");
     } catch (error) {
       toast.error("멤버 제거에 실패했습니다.");
     }
@@ -217,13 +223,38 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
                   </div>
 
                   {user.id === familyGroupDetail.ownerId && (
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleSelectedDeleteMember(member)}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
+                    <Dialog open={isDeleteMemberDialogOpen} onOpenChange={setIsDeleteMemberDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>멤버 삭제</DialogTitle>
+                          <DialogDescription>
+                            정말 이 멤버를 삭제하시겠습니까?
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex justify-end gap-3">
+                          <Button
+                            variant="destructive"
+                            onClick={() => handleSelectedDeleteMember(member)}
+                          >
+                            삭제
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsDeleteGroupDialogOpen(false)}
+                          >
+                            취소
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   )}
                 </div>
               )) : (
@@ -323,18 +354,25 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
               ))}
             </FlexDiv>
           ) : (
-            <FlexDiv className="flex-col w-full h-full justify-center items-center gap-y-4">
-              <FlexDiv className="flex-col justify-center items-center gap-y-2">
-                <StickyNoteOff size={128} />
-                등록된 추모관이 없습니다
+            <>
+              <FlexDiv className="flex-col w-full h-full justify-center items-center gap-y-4">
+                <FlexDiv className="flex-col justify-center items-center gap-y-2">
+                  <StickyNoteOff size={128} />
+                  등록된 추모관이 없습니다
+                </FlexDiv>
+                {familyGroupDetail.ownerId === user.id && (
+                  <Button onClick={() => setIsAddMemorialOpen(true)}>
+                    <PlusIcon size={24} />
+                    새 추모관 등록
+                  </Button>
+                )}
               </FlexDiv>
-              {familyGroupDetail.ownerId === user.id && (
-                <Button onClick={() => setIsAddMemorialOpen(true)}>
-                  <PlusIcon size={24} />
-                  새 추모관 등록
-                </Button>
-              )}
-            </FlexDiv>
+              <RegisterMemorialHallDialog
+                token={token}
+                isOpen={isAddMemorialOpen}
+                setIsOpen={setIsAddMemorialOpen}
+              />
+            </>
           )}
         </Card>
       </div>
@@ -372,11 +410,6 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
           </Dialog>
         </FlexDiv>
       )}
-      <RegisterMemorialHallDialog
-        token={token}
-        isOpen={isAddMemorialOpen}
-        setIsOpen={setIsAddMemorialOpen}
-      />
     </div>
   )
 }
