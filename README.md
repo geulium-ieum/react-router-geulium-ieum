@@ -6,3 +6,12 @@
 - 언어: TypeScript
 - 프레임워크: React Router (구 Remix), Tailwind CSS
 - 디자인: Shadcn/UI
+
+.env 값
+- VITE_API_URL=API 주소
+- VITE_SECRET_KEY="gisecrets"
+- VITE_NAVER_CLIENT_ID=네이버 클라이언트 ID
+- VITE_KAKAO_CLIENT_ID=카카오 클라이언트 ID
+- VITE_NAVER_CALLBACK_URL="http://localhost:5173/auth/naver/login"
+- VITE_NAVER_AUTH_REDIRECT_URI="http://localhost:5173/auth/naver/login"
+- VITE_KAKAO_AUTH_REDIRECT_URI="http://localhost:5173/auth/kakao/login"
