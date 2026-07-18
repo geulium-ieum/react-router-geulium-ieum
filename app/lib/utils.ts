@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import ky from "ky";
+import { useState, useMemo } from "react";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -65,9 +66,26 @@ export function formatNoticeDate(dateInput: string | Date): string {
   return `${yy}.${mm}.${dd}`;
 }
 
-// components/Pagination.tsx
-interface PaginationProps {
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
+export function usePagination<T>(items: T[], pageSize: number) {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(items.length / pageSize);
+
+  const currentItems = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    const end = start + pageSize;
+    return items.slice(start, end);
+  }, [items, currentPage, pageSize]);
+
+  const goToPage = (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
+
+  return {
+    currentPage,
+    totalPages,
+    currentItems,
+    goToPage,
+  };
 }

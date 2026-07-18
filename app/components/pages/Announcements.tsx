@@ -24,6 +24,8 @@ import type { Route as RootRoute } from "../../+types/root";
 import { getSession } from "~/lib/sessions.server";
 import { userContext } from "~/context/userContext";
 import { formatNoticeDate } from "~/lib/utils";
+import { usePagination } from "~/lib/utils";
+import Pagination from "~/components/ui/pagination";
 
 interface Announcement {
   id: string;
@@ -55,8 +57,14 @@ export async function loader() {
   return { announcements };
 }
 
+const PAGE_SIZE = 10;
+
 export default function Announcements({ loaderData }: Route.ComponentProps) {
   const { announcements } = loaderData;
+  const { currentPage, totalPages, currentItems, goToPage } = usePagination(
+    announcements,
+    PAGE_SIZE,
+  );
   const { user } = useRouteLoaderData(
     "root",
   ) as RootRoute.ComponentProps["loaderData"];
@@ -81,7 +89,7 @@ export default function Announcements({ loaderData }: Route.ComponentProps) {
     setIsEditDialogOpen(true);
   };
 
-  const sortedAnnouncements = [...announcementsState].sort((a, b) => {
+  const sortedAnnouncements = [...currentItems].sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1;
     if (!a.isPinned && b.isPinned) return 1;
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -151,8 +159,14 @@ export default function Announcements({ loaderData }: Route.ComponentProps) {
             </div>
           )}
         </div>{" "}
+        <div className="flex justify-center mt-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={goToPage}
+          />
+        </div>
       </div>
-
       <Footer />
     </div>
   );
