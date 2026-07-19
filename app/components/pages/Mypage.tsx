@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { Route } from "./+types/Mypage";
 import { userContext } from "~/context/userContext";
 import { getSession } from "~/lib/sessions.server";
@@ -47,91 +47,136 @@ export async function action({ request, context }: Route.ActionArgs) {
         return redirect('/login');
     }
 
-    // TODO: 수정 버튼을 눌렀을 떄 API 호출 안되도록 수정 필요
     try {
         await userService.put.userProfile({
             name,
             phone,
-            marketingAgreed: isMarketingAgreed ? true : false,
+            marketingAgreed: isMarketingAgreed,
             userId: user.id,
             token
-        })
+        });
+        return { isUpdated: true, updatedAt: Date.now() };
     } catch (error) {
         console.error(error);
+        return { isUpdated: false, updatedAt: Date.now() };
     }
 }
 
-export default function Mypage({ loaderData }: Route.ComponentProps) {
+export default function Mypage({ loaderData, actionData }: Route.ComponentProps) {
     const { user } = loaderData;
+    const isUpdated = actionData?.isUpdated;
+    const updatedAt = actionData?.updatedAt;
 
     const [isEdit, setIsEdit] = useState(false);
-    const [name, setName] = useState("");
-    const [phone, setPhone] = useState("");
-    const [marketingAgreed, setMarketingAgreed] = useState<"true" | "false">("false");
+    const [name, setName] = useState(user.name || "");
+    const [phone, setPhone] = useState(user.phone || "");
+    const [marketingAgreed, setMarketingAgreed] = useState<"true" | "false">(String(user.marketingAgreed) as "true" | "false" || "false");
 
-    const handleEditUserInfo = () => {
+    const handleEditUserInfo = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        e.preventDefault();
         setIsEdit(true);
     };
 
+    const handleChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setName(e.target.value);
+    };
+
+    const handleChangePhone = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const regex = /^[0-9]{0,13}$/;
+        if (regex.test(e.target.value)) {
+            setPhone(e.target.value);
+        }
+    };
+
+    useEffect(() => {
+        if (isUpdated === undefined) return;
+        setIsEdit(!isUpdated);
+    }, [isUpdated, updatedAt]);
+
     return (
         <div className="max-w-7xl mx-auto min-h-[calc(100vh-398px)] px-4 sm:px-6 lg:px-8 py-12">
-            <h1 className="text-3xl text-gray-900 mb-2">마이페이지</h1>
-            <Card>
-                <CardHeader>
-                    <CardTitle>내 정보</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Form method="PUT">
-                        <FieldGroup>
-                            <Field>
-                                <FieldLabel htmlFor="name">이름</FieldLabel>
-                                <Input
-                                    id="name"
-                                    type="text"
-                                    defaultValue={user.name}
-                                    disabled={!isEdit}
-                                />
-                            </Field>
-                            <Field>
-                                <FieldLabel htmlFor="phone">휴대폰 번호</FieldLabel>
-                                <Input
-                                    id="phone"
-                                    type="tel"
-                                    defaultValue={user.phone}
-                                    disabled={!isEdit}
-                                />
-                            </Field>
-                            <Field>
-                                <Input
-                                    type="hidden"
-                                    name="marketingAgreed"
-                                    value={marketingAgreed}
-                                />
-                                <FlexDiv className="flex gap-x-2 items-center">
-                                    <Switch id="marketingAgreed" />
-                                    <FieldLabel htmlFor="marketingAgree">
-                                        마케팅 수신 동의
-                                    </FieldLabel>
-                                </FlexDiv>
-                            </Field>
-                            <Field>
-                                {isEdit ? (
-                                    <Button onClick={handleEditUserInfo}>
-                                        완료
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        type="button"
-                                        onClick={handleEditUserInfo}
-                                    >
-                                        수정
-                                    </Button>
-                                )}
-                            </Field>
-                        </FieldGroup>
-                    </Form>
-                </CardContent>
-            </Card>
+            <FlexDiv className="flex-col gap-y-6">
+                <h1 className="text-3xl text-gray-900">마이페이지</h1>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>내 정보</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Form method="PUT">
+                            <FieldGroup>
+                                <Field>
+                                    <FieldLabel htmlFor="name">이름</FieldLabel>
+                                    <Input
+                                        id="name"
+                                        name="name"
+                                        type="text"
+                                        value={name}
+                                        onChange={handleChangeName}
+                                        disabled={!isEdit}
+                                    />
+                                </Field>
+                                <Field>
+                                    <FieldLabel htmlFor="phone">휴대폰 번호</FieldLabel>
+                                    <Input
+                                        id="phone"
+                                        name="phone"
+                                        value={phone}
+                                        onChange={handleChangePhone}
+                                        disabled={!isEdit}
+                                    />
+                                </Field>
+                                <Field>
+                                    <Input
+                                        type="hidden"
+                                        name="marketingAgreed"
+                                        value={marketingAgreed}
+                                    />
+                                    <FlexDiv className="flex gap-x-2 items-center">
+                                        <Switch
+                                            id="marketingAgreed"
+                                            disabled={!isEdit}
+                                        />
+                                        <FieldLabel htmlFor="marketingAgree">
+                                            마케팅 수신 동의
+                                        </FieldLabel>
+                                    </FlexDiv>
+                                </Field>
+                                <Field>
+                                    {isEdit ? (
+                                        <Button type="submit">
+                                            완료
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            type="button"
+                                            onClick={handleEditUserInfo}
+                                        >
+                                            수정
+                                        </Button>
+                                    )}
+                                </Field>
+                            </FieldGroup>
+                        </Form>
+                    </CardContent>
+                </Card>
+                {/* TODO: 추모글, 추모관 작업 */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>내가 남긴 추모글</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>관리 중인 추모관</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+
+                    </CardContent>
+                </Card>
+            </FlexDiv>
         </div>
     )
 }

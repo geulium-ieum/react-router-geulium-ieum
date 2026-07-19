@@ -253,7 +253,7 @@ export async function putUserProfile({
                 phone,
                 marketingAgreed
             }
-        }).json();
+        });
     } catch (error) {
         throw error;
     }

@@ -7,7 +7,7 @@
 - 프레임워크: React Router (구 Remix), Tailwind CSS
 - 디자인: Shadcn/UI
 
-.env 값
+## .env 값
 - VITE_API_URL=API 주소
 - VITE_SECRET_KEY="gisecrets"
 - VITE_NAVER_CLIENT_ID=네이버 클라이언트 ID
