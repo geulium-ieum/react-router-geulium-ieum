@@ -25,7 +25,7 @@ import { getSession } from "~/lib/sessions.server";
 import { userContext } from "~/context/userContext";
 import { formatNoticeDate } from "~/lib/utils";
 import { usePagination } from "~/lib/utils";
-import Pagination from "~/components/ui/pagination";
+import CustomPagination from "~/components/organisms/Pagination";
 
 interface Announcement {
   id: string;
@@ -160,7 +160,7 @@ export default function Announcements({ loaderData }: Route.ComponentProps) {
           )}
         </div>{" "}
         <div className="flex justify-center mt-4">
-          <Pagination
+          <CustomPagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={goToPage}
