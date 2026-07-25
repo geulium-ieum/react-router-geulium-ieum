@@ -8,8 +8,10 @@ import { Form, redirect } from "react-router";
 import { userService } from "~/lib/services/user";
 import { Input } from "~/components/ui/input";
 import { Field, FieldGroup, FieldLabel } from "~/components/ui/field";
-import { Switch } from "../ui/switch";
-import FlexDiv from "../FlexDiv";
+import { Switch } from "~/components/ui/switch";
+import FlexDiv from "~/components/FlexDiv";
+import { updatedTime } from "~/lib/utils";
+import { Dialog } from "../ui/dialog";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
     const user = context.get(userContext);
@@ -43,7 +45,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     const phone = formData.get('phone') as string;
     const marketingAgreed = formData.get("marketingAgreed") as "true" | "false";
     const isMarketingAgreed = marketingAgreed === "true";
-    if(!user || !token) {
+    if (!user || !token) {
         return redirect('/login');
     }
 
@@ -63,7 +65,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function Mypage({ loaderData, actionData }: Route.ComponentProps) {
-    const { user } = loaderData;
+    const { user, myTributes, myMemorials } = loaderData;
     const isUpdated = actionData?.isUpdated;
     const updatedAt = actionData?.updatedAt;
 
@@ -71,6 +73,8 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
     const [name, setName] = useState(user.name || "");
     const [phone, setPhone] = useState(user.phone || "");
     const [marketingAgreed, setMarketingAgreed] = useState<"true" | "false">(String(user.marketingAgreed) as "true" | "false" || "false");
+    const [selectedMemorialId, setSelectedMemorialId] = useState<string>("");
+    const [memorialIsOpen, setMemorialIsOpen] = useState<boolean>(false);
 
     const handleEditUserInfo = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
@@ -86,6 +90,11 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
         if (regex.test(e.target.value)) {
             setPhone(e.target.value);
         }
+    };
+
+    const handleViewMemorial = (memorialId: string) => {
+        setSelectedMemorialId(memorialId);
+        setMemorialIsOpen(true);
     };
 
     useEffect(() => {
@@ -159,13 +168,33 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
                         </Form>
                     </CardContent>
                 </Card>
-                {/* TODO: 추모글, 추모관 작업 */}
                 <Card>
                     <CardHeader>
                         <CardTitle>내가 남긴 추모글</CardTitle>
                     </CardHeader>
                     <CardContent>
-
+                        <div className="space-y-4">
+                            {myTributes.length === 0 && (
+                                <div className="text-center text-gray-500">
+                                    내가 남긴 추모글이 없습니다.
+                                </div>
+                            )}
+                            {myTributes.map((tribute) => (
+                                <Card key={tribute.id} className="p-4 hover:shadow-md transition-shadow">
+                                    <div className="flex items-start justify-between mb-2">
+                                        <h3>{tribute.content}</h3>
+                                        <p className="text-sm text-gray-500">
+                                            {updatedTime(tribute.createdAt)}
+                                        </p>
+                                    </div>
+                                    <p className="text-gray-700">{tribute.content}</p>
+                                    <div className="flex items-center justify-end gap-2">
+                                        <Button variant="outline">수정</Button>
+                                        <Button variant="destructive">삭제</Button>
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -173,7 +202,37 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
                         <CardTitle>관리 중인 추모관</CardTitle>
                     </CardHeader>
                     <CardContent>
-
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {myMemorials.length === 0 && (
+                                <div className="text-center text-gray-500">
+                                    내 추모관이 없습니다.
+                                </div>
+                            )}
+                            {myMemorials.map(memorial => (
+                                <Card
+                                    key={memorial.id}
+                                    className="py-0 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                                    onClick={() => handleViewMemorial(memorial.id)}
+                                >
+                                    <div className="aspect-square relative overflow-hidden bg-gray-200">
+                                        <img
+                                            src={memorial.photoUrl || "https://placehold.co/380x380/png"}
+                                            alt="추모관 사진"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="p-4">
+                                        <h3 className="mb-1">{memorial.deceasedName}</h3>
+                                        <p className="text-sm text-gray-600 mb-1">{memorial.location}</p>
+                                        <p className="text-sm text-gray-500">{memorial.deathDate}</p>
+                                    </div>
+                                    {/* TODO: 추모관 상세 팝업 제작 */}
+                                    <Dialog open={memorialIsOpen}>
+                                        
+                                    </Dialog>
+                                </Card>
+                            ))}
+                        </div>
                     </CardContent>
                 </Card>
             </FlexDiv>

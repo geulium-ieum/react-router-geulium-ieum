@@ -67,8 +67,8 @@ export type FamilyGroupMember = v.InferOutput<typeof FamilyGroupMemberSchema>;
 export type FamilyGroupDetail = v.InferOutput<typeof FamilyGroupDetailSchema>;
 export interface MemorialFilterProps extends ListParams {
   name: string;
-  birthDate: string;
-  deathDate: string;
+  birthDate?: string;
+  deathDate?: string;
 }
 
 export type Token = v.InferOutput<typeof TokenSchema>;

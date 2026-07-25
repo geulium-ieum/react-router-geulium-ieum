@@ -9,6 +9,7 @@ export default [
     route("/my", "./components/pages/My.tsx"),
     ...prefix("family-groups", [
       index("./components/pages/familyGroup/Home.tsx"),
+      route("/join", "./components/pages/familyGroup/Join.tsx"),
       route(":id", "./components/pages/familyGroup/Detail.tsx")
     ]),
     route("/auth/verify-email", "./components/pages/VerifyEmail.tsx"),

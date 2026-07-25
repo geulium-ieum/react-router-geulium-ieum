@@ -51,21 +51,11 @@ export async function action({ request }: Route.ActionArgs) {
   const name = formData.get("name");
   const birthDate = formData.get("birthDate");
   const deathDate = formData.get("deathDate");
-  if (!name || !birthDate || !deathDate) {
-    try {
-      const response = await memorialService.get.memorialList({
-        size: 10
-      });
-      return response.content;
-    } catch (error) {
-      console.error(error);
-    }
-  }
   try {
     const response = await memorialService.get.memorialFilter({
       name: name as string,
-      birthDate: birthDate as string,
-      deathDate: deathDate as string
+      birthDate: birthDate ? birthDate as string : undefined,
+      deathDate: deathDate ? deathDate as string : undefined
     });
     return response.content;
   } catch (error) {
@@ -312,7 +302,6 @@ export default function SearchDeceased({
         token={token}
         isOpen={isRegisterDialogOpen}
         setIsOpen={setIsRegisterDialogOpen}
-        path="search"
       />
 
       <Footer />

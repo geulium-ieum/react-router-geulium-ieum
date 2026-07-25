@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import ky from "ky";
 import { useState, useMemo } from "react";
+import moment from "moment";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -25,11 +26,7 @@ export function updatedTime(time: string) {
   } else if (diffInDays < 7) {
     return `${diffInDays}일 전`;
   } else {
-    return updatedTime.toLocaleDateString("ko-KR", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    return moment(updatedTime).format("YYYY-MM-DD");
   }
 }
 

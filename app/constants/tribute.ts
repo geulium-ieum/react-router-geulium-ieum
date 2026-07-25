@@ -5,19 +5,13 @@ export const tributeListSchema = v.object({
   ...ListSchema.entries,
   content: v.array(
     v.object({
-      id: v.number(),
-      memorialId: v.number(),
-      userId: v.number(),
+      id: v.string(),
+      memorialId: v.string(),
+      userId: v.string(),
       content: v.string(),
       isPublic: v.boolean(),
-      createdAt: v.pipe(
-        v.string(),
-        v.isoTimestamp('The timestamp is badly formatted.')
-      ),
-      updatedAt: v.pipe(
-        v.string(),
-        v.isoTimestamp('The timestamp is badly formatted.')
-      )
+      createdAt: v.string(),
+      updatedAt: v.string()
     })
   )
 });
