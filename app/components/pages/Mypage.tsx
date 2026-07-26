@@ -7,11 +7,26 @@ import { getSession } from "~/lib/sessions.server";
 import { Form, redirect } from "react-router";
 import { userService } from "~/lib/services/user";
 import { Input } from "~/components/ui/input";
+import { Badge } from "~/components/ui/badge";
+import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "~/components/ui/combobox";
 import { Field, FieldGroup, FieldLabel } from "~/components/ui/field";
 import { Switch } from "~/components/ui/switch";
 import FlexDiv from "~/components/FlexDiv";
 import { updatedTime } from "~/lib/utils";
-import { Dialog } from "../ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import moment from "moment";
+
+const visibilityOptions = [
+    { value: "PUBLIC", label: "공개", className: "rounded-full bg-blue-100 text-blue-500!" },
+    { value: "PRIVATE", label: "비공개", className: "rounded-full bg-red-100 text-red-500!" },
+];
+
+const statusOptions = [
+    { value: "PENDING", label: "승인 대기 중", className: "rounded-full bg-yellow-100 text-yellow-500!" },
+    { value: "REJECT", label: "거절", className: "rounded-full bg-red-100 text-red-500!" },
+    { value: "APPROVED", label: "승인", className: "rounded-full bg-green-100 text-green-500!" },
+    { value: "CANCEL", label: "취소", className: "rounded-full bg-gray-100 text-gray-500!" },
+];
 
 export async function loader({ request, context }: Route.LoaderArgs) {
     const user = context.get(userContext);
@@ -76,6 +91,28 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
     const [selectedMemorialId, setSelectedMemorialId] = useState<string>("");
     const [memorialIsOpen, setMemorialIsOpen] = useState<boolean>(false);
 
+    const [isMemorialEdit, setIsMemorialEdit] = useState(false);
+    const [memorialForm, setMemorialForm] = useState({
+        deceasedName: "",
+        location: "",
+        birthDate: "",
+        deathDate: "",
+        biography: "",
+        visibility: "",
+        status: "",
+        photoUrl: "",
+    });
+
+    const selectedMemorial = myMemorials.find((memorial) => memorial.id === selectedMemorialId);
+
+    // TODO: 등록자, 수정자 수정 필요
+    const memorialReadOnlyFields = selectedMemorial ? [
+        { label: "등록자", value: selectedMemorial.createdBy },
+        { label: "수정자", value: selectedMemorial.updatedBy },
+        { label: "등록일", value: moment(selectedMemorial.createdAt).format("YYYY-MM-DD HH:mm") },
+        { label: "수정일", value: moment(selectedMemorial.updatedAt).format("YYYY-MM-DD HH:mm") },
+    ] : [];
+
     const handleEditUserInfo = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
         setIsEdit(true);
@@ -93,8 +130,38 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
     };
 
     const handleViewMemorial = (memorialId: string) => {
+        const memorial = myMemorials.find((memorial) => memorial.id === memorialId);
         setSelectedMemorialId(memorialId);
+        setIsMemorialEdit(false);
+        if (memorial) {
+            setMemorialForm({
+                deceasedName: memorial.deceasedName,
+                location: memorial.location || "",
+                birthDate: memorial.birthDate,
+                deathDate: memorial.deathDate,
+                biography: memorial.biography || "",
+                visibility: memorial.visibility,
+                status: memorial.status,
+                photoUrl: memorial.photoUrl || "",
+            });
+        }
         setMemorialIsOpen(true);
+    };
+
+    const handleMemorialOpenChange = (open: boolean) => {
+        setMemorialIsOpen(open);
+        if (!open) {
+            setIsMemorialEdit(false);
+        }
+    };
+
+    const handleChangeMemorialField = (field: keyof typeof memorialForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        setMemorialForm((prev) => ({ ...prev, [field]: e.target.value }));
+    };
+
+    const handleToggleMemorialEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        setIsMemorialEdit((prev) => !prev);
     };
 
     useEffect(() => {
@@ -226,13 +293,143 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
                                         <p className="text-sm text-gray-600 mb-1">{memorial.location}</p>
                                         <p className="text-sm text-gray-500">{memorial.deathDate}</p>
                                     </div>
-                                    {/* TODO: 추모관 상세 팝업 제작 */}
-                                    <Dialog open={memorialIsOpen}>
-                                        
-                                    </Dialog>
                                 </Card>
                             ))}
                         </div>
+                        <Dialog open={memorialIsOpen} onOpenChange={handleMemorialOpenChange}>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>{selectedMemorial?.deceasedName} 추모관</DialogTitle>
+                                </DialogHeader>
+                                {selectedMemorial && (
+                                    <div className="space-y-4">
+                                        <div className="aspect-square w-32 mx-auto overflow-hidden bg-gray-200">
+                                            <img
+                                                src={memorialForm.photoUrl || "https://placehold.co/380x380/png"}
+                                                alt="추모관 사진"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <FieldGroup>
+                                            <Field>
+                                                <FieldLabel htmlFor="deceasedName">이름</FieldLabel>
+                                                <Input
+                                                    id="deceasedName"
+                                                    value={memorialForm.deceasedName}
+                                                    onChange={handleChangeMemorialField("deceasedName")}
+                                                    disabled={!isMemorialEdit}
+                                                />
+                                            </Field>
+                                            <Field>
+                                                <FieldLabel htmlFor="location">안치 장소</FieldLabel>
+                                                <Input
+                                                    id="location"
+                                                    value={memorialForm.location}
+                                                    onChange={handleChangeMemorialField("location")}
+                                                    disabled={!isMemorialEdit}
+                                                />
+                                            </Field>
+                                            <Field>
+                                                <FieldLabel htmlFor="birthDate">생년월일</FieldLabel>
+                                                <Input
+                                                    id="birthDate"
+                                                    type="date"
+                                                    value={memorialForm.birthDate}
+                                                    onChange={handleChangeMemorialField("birthDate")}
+                                                    disabled={!isMemorialEdit}
+                                                />
+                                            </Field>
+                                            <Field>
+                                                <FieldLabel htmlFor="deathDate">기일</FieldLabel>
+                                                <Input
+                                                    id="deathDate"
+                                                    type="date"
+                                                    value={memorialForm.deathDate}
+                                                    onChange={handleChangeMemorialField("deathDate")}
+                                                    disabled={!isMemorialEdit}
+                                                />
+                                            </Field>
+                                            <Field>
+                                                <FieldLabel htmlFor="biography">소개</FieldLabel>
+                                                <Input
+                                                    id="biography"
+                                                    value={memorialForm.biography}
+                                                    onChange={handleChangeMemorialField("biography")}
+                                                    disabled={!isMemorialEdit}
+                                                />
+                                            </Field>
+                                            <Field>
+                                                <FieldLabel htmlFor="visibility">공개 여부</FieldLabel>
+                                                <Combobox
+                                                    items={visibilityOptions}
+                                                    itemToStringValue={(option) => option.label}
+                                                    value={visibilityOptions.find((option) => option.value === memorialForm.visibility) ?? null}
+                                                    onValueChange={(option) => setMemorialForm((prev) => ({ ...prev, visibility: option?.value ?? "" }))}
+                                                    disabled={!isMemorialEdit}
+                                                >
+                                                    <ComboboxInput id="visibility" placeholder="공개 여부를 선택해주세요" />
+                                                    <ComboboxContent className="pointer-events-auto">
+                                                        <ComboboxEmpty>검색 결과가 없습니다</ComboboxEmpty>
+                                                        <ComboboxList>
+                                                            {(option) => (
+                                                                <ComboboxItem key={option.value} value={option}>
+                                                                    <Badge className={option.className}>{option.label}</Badge>
+                                                                </ComboboxItem>
+                                                            )}
+                                                        </ComboboxList>
+                                                    </ComboboxContent>
+                                                </Combobox>
+                                            </Field>
+                                            <Field>
+                                                <FieldLabel htmlFor="status">상태</FieldLabel>
+                                                <Combobox
+                                                    items={statusOptions}
+                                                    itemToStringValue={(option) => option.label}
+                                                    value={statusOptions.find((option) => option.value === memorialForm.status) ?? null}
+                                                    onValueChange={(option) => setMemorialForm((prev) => ({ ...prev, status: option?.value ?? "" }))}
+                                                    disabled={!isMemorialEdit}
+                                                >
+                                                    <ComboboxInput id="status" placeholder="상태를 선택해주세요" />
+                                                    <ComboboxContent className="pointer-events-auto">
+                                                        <ComboboxEmpty>검색 결과가 없습니다</ComboboxEmpty>
+                                                        <ComboboxList>
+                                                            {(option) => (
+                                                                <ComboboxItem key={option.value} value={option}>
+                                                                    <Badge className={option.className}>{option.label}</Badge>
+                                                                </ComboboxItem>
+                                                            )}
+                                                        </ComboboxList>
+                                                    </ComboboxContent>
+                                                </Combobox>
+                                            </Field>
+                                        </FieldGroup>
+                                        <dl className="space-y-2">
+                                            {memorialReadOnlyFields.map((field) => (
+                                                <div key={field.label} className="flex items-start justify-between gap-4">
+                                                    <dt className="text-gray-500 shrink-0">{field.label}</dt>
+                                                    <dd className="text-right break-all">{field.value}</dd>
+                                                </div>
+                                            ))}
+                                        </dl>
+                                        <DialogFooter>
+                                            <Button
+                                                type="button"
+                                                onClick={handleToggleMemorialEdit}
+                                            >
+                                                {isMemorialEdit ? "완료" : "수정"}
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => handleMemorialOpenChange(false)}
+                                            >
+                                                닫기
+                                            </Button>
+                                        </DialogFooter>
+                                    </div>
+                                )}
+                            </DialogContent>
+                        </Dialog>
                     </CardContent>
                 </Card>
             </FlexDiv>
