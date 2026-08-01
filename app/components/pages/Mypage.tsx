@@ -4,9 +4,10 @@ import React, { useEffect, useState } from "react";
 import type { Route } from "./+types/Mypage";
 import { userContext } from "~/context/userContext";
 import { getSession } from "~/lib/sessions.server";
-import { Form, redirect } from "react-router";
+import { Form, redirect, useRevalidator } from "react-router";
 import { userService } from "~/lib/services/user";
 import { Input } from "~/components/ui/input";
+import { Textarea } from "~/components/ui/textarea";
 import { Badge } from "~/components/ui/badge";
 import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "~/components/ui/combobox";
 import { Field, FieldGroup, FieldLabel } from "~/components/ui/field";
@@ -15,6 +16,8 @@ import FlexDiv from "~/components/FlexDiv";
 import { updatedTime } from "~/lib/utils";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import moment from "moment";
+import { tributeService } from "~/lib/services/tribute";
+import { toast } from "sonner";
 
 const visibilityOptions = [
     { value: "PUBLIC", label: "공개", className: "rounded-full bg-blue-100 text-blue-500!" },
@@ -37,16 +40,17 @@ export async function loader({ request, context }: Route.LoaderArgs) {
         return redirect('/login');
     }
     try {
-        const myTributes = await userService.get.tributeList({ userId: user.id, token });
+        const myTributes = await tributeService.get.tributeList({ userId: user.id, token });
         const myMemorials = await userService.get.memorialList({ token });
         return {
             user,
+            token,
             myTributes: myTributes.content,
             myMemorials: myMemorials.content,
         };
     } catch (error) {
         console.log(error);
-        return { user, myTributes: [], myMemorials: [] };
+        return { user, token, myTributes: [], myMemorials: [] };
     }
 }
 
@@ -80,7 +84,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function Mypage({ loaderData, actionData }: Route.ComponentProps) {
-    const { user, myTributes, myMemorials } = loaderData;
+    const { user, token, myTributes, myMemorials } = loaderData;
     const isUpdated = actionData?.isUpdated;
     const updatedAt = actionData?.updatedAt;
 
@@ -88,9 +92,16 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
     const [name, setName] = useState(user.name || "");
     const [phone, setPhone] = useState(user.phone || "");
     const [marketingAgreed, setMarketingAgreed] = useState<"true" | "false">(String(user.marketingAgreed) as "true" | "false" || "false");
+    const [selectedTributeId, setSelectedTributeId] = useState<string>("");
+    const [tributeIsOpen, setTributeIsOpen] = useState<boolean>(false);
     const [selectedMemorialId, setSelectedMemorialId] = useState<string>("");
     const [memorialIsOpen, setMemorialIsOpen] = useState<boolean>(false);
 
+    const [isTributeEdit, setIsTributeEdit] = useState(false);
+    const [tributeForm, setTributeForm] = useState({
+        content: "",
+        visibility: "",
+    });
     const [isMemorialEdit, setIsMemorialEdit] = useState(false);
     const [memorialForm, setMemorialForm] = useState({
         deceasedName: "",
@@ -102,6 +113,8 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
         status: "",
         photoUrl: "",
     });
+
+    const revalidator = useRevalidator();
 
     const selectedMemorial = myMemorials.find((memorial) => memorial.id === selectedMemorialId);
 
@@ -129,6 +142,19 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
         }
     };
 
+    const handleViewTribute = (tributeId: string) => {
+        const tribute = myTributes.find((tribute) => tribute.id === tributeId);
+        setSelectedTributeId(tributeId);
+        setIsTributeEdit(false);
+        if (tribute) {
+            setTributeForm({
+                content: tribute.content,
+                visibility: tribute.isPublic ? "PUBLIC" : "PRIVATE",
+            });
+        }
+        setTributeIsOpen(true);
+    };
+
     const handleViewMemorial = (memorialId: string) => {
         const memorial = myMemorials.find((memorial) => memorial.id === memorialId);
         setSelectedMemorialId(memorialId);
@@ -148,6 +174,35 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
         setMemorialIsOpen(true);
     };
 
+    const handleTributeOpenChange = (open: boolean) => {
+        setTributeIsOpen(open);
+        if (!open) {
+            setIsTributeEdit(false);
+        }
+    }
+
+    const handleChangeTributeContent = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setTributeForm((prev) => ({ ...prev, content: e.target.value }));
+    };
+
+    const handleToggleTributeEdit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        if (isTributeEdit) {
+            try {
+                await tributeService.put.tribute({
+                    id: selectedTributeId,
+                    token: token!
+                });
+                revalidator.revalidate();
+                toast.success("추모글을 수정했습니다.");
+            } catch (error) {
+                console.error(error);
+                toast.error("추모글 수정에 실패했습니다.");
+            }
+        }
+        setIsTributeEdit((prev) => !prev);
+    };
+
     const handleMemorialOpenChange = (open: boolean) => {
         setMemorialIsOpen(open);
         if (!open) {
@@ -159,8 +214,11 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
         setMemorialForm((prev) => ({ ...prev, [field]: e.target.value }));
     };
 
-    const handleToggleMemorialEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleToggleMemorialEdit = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
+        if (isMemorialEdit) {
+            // TODO: API 작업
+        }
         setIsMemorialEdit((prev) => !prev);
     };
 
@@ -256,12 +314,76 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
                                     </div>
                                     <p className="text-gray-700">{tribute.content}</p>
                                     <div className="flex items-center justify-end gap-2">
-                                        <Button variant="outline">수정</Button>
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => handleViewTribute(tribute.id)}
+                                        >
+                                            수정
+                                        </Button>
                                         <Button variant="destructive">삭제</Button>
                                     </div>
                                 </Card>
                             ))}
                         </div>
+                        <Dialog open={tributeIsOpen} onOpenChange={handleTributeOpenChange}>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>추모글</DialogTitle>
+                                </DialogHeader>
+                                {selectedTributeId && (
+                                    <div className="space-y-4">
+                                        <FieldGroup>
+                                            <Field>
+                                                <FieldLabel htmlFor="tribute-content">내용</FieldLabel>
+                                                <Textarea
+                                                    id="tribute-content"
+                                                    value={tributeForm.content}
+                                                    onChange={handleChangeTributeContent}
+                                                    disabled={!isTributeEdit}
+                                                />
+                                            </Field>
+                                            <Field>
+                                                <FieldLabel htmlFor="tribute-visibility">공개 여부</FieldLabel>
+                                                <Combobox
+                                                    items={visibilityOptions}
+                                                    itemToStringValue={(option) => option.label}
+                                                    value={visibilityOptions.find((option) => option.value === tributeForm.visibility) ?? null}
+                                                    onValueChange={(option) => setTributeForm((prev) => ({ ...prev, visibility: option?.value ?? "" }))}
+                                                    disabled={!isTributeEdit}
+                                                >
+                                                    <ComboboxInput id="tribute-visibility" placeholder="공개 여부를 선택해주세요" />
+                                                    <ComboboxContent className="pointer-events-auto">
+                                                        <ComboboxEmpty>검색 결과가 없습니다</ComboboxEmpty>
+                                                        <ComboboxList>
+                                                            {(option) => (
+                                                                <ComboboxItem key={option.value} value={option}>
+                                                                    <Badge className={option.className}>{option.label}</Badge>
+                                                                </ComboboxItem>
+                                                            )}
+                                                        </ComboboxList>
+                                                    </ComboboxContent>
+                                                </Combobox>
+                                            </Field>
+                                        </FieldGroup>
+                                        <DialogFooter>
+                                            <Button
+                                                type="button"
+                                                onClick={handleToggleTributeEdit}
+                                            >
+                                                {isTributeEdit ? "완료" : "수정"}
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => handleTributeOpenChange(false)}
+                                            >
+                                                닫기
+                                            </Button>
+                                        </DialogFooter>
+                                    </div>
+                                )}
+                            </DialogContent>
+                        </Dialog>
                     </CardContent>
                 </Card>
                 <Card>
@@ -380,27 +502,11 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
                                                     </ComboboxContent>
                                                 </Combobox>
                                             </Field>
-                                            <Field>
+                                            <Field className="w-fit">
                                                 <FieldLabel htmlFor="status">상태</FieldLabel>
-                                                <Combobox
-                                                    items={statusOptions}
-                                                    itemToStringValue={(option) => option.label}
-                                                    value={statusOptions.find((option) => option.value === memorialForm.status) ?? null}
-                                                    onValueChange={(option) => setMemorialForm((prev) => ({ ...prev, status: option?.value ?? "" }))}
-                                                    disabled={!isMemorialEdit}
-                                                >
-                                                    <ComboboxInput id="status" placeholder="상태를 선택해주세요" />
-                                                    <ComboboxContent className="pointer-events-auto">
-                                                        <ComboboxEmpty>검색 결과가 없습니다</ComboboxEmpty>
-                                                        <ComboboxList>
-                                                            {(option) => (
-                                                                <ComboboxItem key={option.value} value={option}>
-                                                                    <Badge className={option.className}>{option.label}</Badge>
-                                                                </ComboboxItem>
-                                                            )}
-                                                        </ComboboxList>
-                                                    </ComboboxContent>
-                                                </Combobox>
+                                                <Badge className={statusOptions.find((option) => option.value === memorialForm.status)?.className}>
+                                                    {statusOptions.find((option) => option.value === memorialForm.status)?.label ?? memorialForm.status}
+                                                </Badge>
                                             </Field>
                                         </FieldGroup>
                                         <dl className="space-y-2">

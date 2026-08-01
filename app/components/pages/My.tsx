@@ -18,6 +18,7 @@ import { getSession, destroySession } from '~/lib/sessions.server';
 import { Form } from 'react-router';
 import { Checkbox } from '~/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from '~/components/ui/dialog';
+import { tributeService } from '~/lib/services/tribute';
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const user = context.get(userContext);
@@ -28,7 +29,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     return redirect('/login');
   }
   try {
-    const myTributes = await userService.get.tributeList({ userId: user.id, token });
+    const myTributes = await tributeService.get.tributeList({ userId: user.id, token });
     const myMemorials = await userService.get.memorialList({ token });
     return {
       user,

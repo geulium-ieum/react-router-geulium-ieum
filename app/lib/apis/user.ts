@@ -2,7 +2,6 @@ import { http } from "~/lib/utils"
 import * as v from 'valibot';
 import { TokenSchema, UserSchema } from "~/constants/user";
 import type { PostLoginParams, PostRegisterParams, PostVerifyEmailParams, PostChangePasswordParams, PostVerifyChangePasswordParams, PostNaverLoginParams, PostKakaoLoginParams, PostWriteAnnouncementParams, ListParams, PutUserProfileParams, DeleteUserParams } from "~/types";
-import { tributeListSchema } from "~/constants/tribute";
 import { MemorialSchema } from "~/constants/memorial";
 
 export async function getMe({ token }: { token: string }) {
@@ -184,25 +183,6 @@ export async function getUserNotificationList({
             }
         }).json();
         return response;
-    } catch (error) {
-        throw error;
-    }
-}
-
-export async function getTributeList({
-    userId,
-    token
-}: ListParams & {
-    userId: string;
-    token: string;
-}) {
-    try {
-        const response = await http.get(`tribute/user/${userId}/list`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        }).json();
-        return v.parse(tributeListSchema, response);
     } catch (error) {
         throw error;
     }

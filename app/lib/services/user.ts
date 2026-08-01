@@ -1,4 +1,4 @@
-import { getUser, postLogin, postRegister, postVerifyEmail, postChangePassword, postVerifyChangePassword, postNaverLogin, postKakaoLogin, getMe, getUserNotificationList, getTributeList, putUserProfile, deleteUser, getMemorialList, getAnnouncementList } from "~/lib/apis/user";
+import { getUser, postLogin, postRegister, postVerifyEmail, postChangePassword, postVerifyChangePassword, postNaverLogin, postKakaoLogin, getMe, getUserNotificationList, putUserProfile, deleteUser, getMemorialList, getAnnouncementList } from "~/lib/apis/user";
 import type { PostLoginParams, PostRegisterParams, PostVerifyEmailParams, PostChangePasswordParams, PostVerifyChangePasswordParams, PostNaverLoginParams, PostKakaoLoginParams, ListParams, PutUserProfileParams, DeleteUserParams } from "~/types";
 
 class UserService {
@@ -17,18 +17,6 @@ class UserService {
         },
         notificationList: async ({ token }: { token: string }) => {
             return await getUserNotificationList({ token });
-        },
-        tributeList: async ({
-            userId,
-            token
-        }:ListParams & {
-            userId: string,
-            token: string
-        }) => {
-            return await getTributeList({
-                userId,
-                token
-            });
         },
         memorialList: async ({
             token
