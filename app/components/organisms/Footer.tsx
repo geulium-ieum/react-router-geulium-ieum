@@ -1,19 +1,24 @@
-import { useState } from 'react';
-import { Heart } from 'lucide-react';
-import { Button } from '~/components/ui/button';
-import FaqDialog from '~/components/templates/dialogs/Faq';
-import InquiryDialog from '~/components/templates/dialogs/Inquiry';
-import GuideDialog from '~/components/templates/dialogs/Guide';
-import TermsDialog from '~/components/templates/dialogs/Terms';
-import PrivacyDialog from '~/components/templates/dialogs/Privacy';
-import AccessibilityDialog from '~/components/templates/dialogs/Accessibility';
-import { Link, useRouteLoaderData } from 'react-router';
+import { useState } from "react";
+import { Heart } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import FaqDialog from "~/components/templates/dialogs/Faq";
+import InquiryDialog from "~/components/templates/dialogs/Inquiry";
+import GuideDialog from "~/components/templates/dialogs/Guide";
+import TermsDialog from "~/components/templates/dialogs/Terms";
+import PrivacyDialog from "~/components/templates/dialogs/Privacy";
+import AccessibilityDialog from "~/components/templates/dialogs/Accessibility";
+import { Link, useRouteLoaderData } from "react-router";
 import type { Route as RootRoute } from "../../+types/root";
 
 export function Footer() {
-  const { user } = useRouteLoaderData("root") as RootRoute.ComponentProps["loaderData"];
+  const { user } = useRouteLoaderData(
+    "root",
+  ) as RootRoute.ComponentProps["loaderData"];
 
-  const [activeDialog, setActiveDialog] = useState<'faq' | 'inquiry' | 'guide' | 'terms' | 'privacy' | 'accessibility' | null>(null);  return (
+  const [activeDialog, setActiveDialog] = useState<
+    "faq" | "inquiry" | "guide" | "terms" | "privacy" | "accessibility" | null
+  >(null);
+  return (
     <>
       <footer className="bg-gray-900 text-gray-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -38,7 +43,7 @@ export function Footer() {
                     to="/"
                     className="font-medium hover:text-white transition-colors"
                   >
-                      홈
+                    홈
                   </Link>
                 </li>
                 <li>
@@ -66,7 +71,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    to={user ? `/helpboard/:${user.id}`: "/login" }
+                    to={user ? `/helpboard/:${user.id}` : "/login"}
                     className="font-medium hover:text-white transition-colors"
                   >
                     1:1 문의
@@ -74,7 +79,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    to="/guide"
+                    to="/guides"
                     className="font-medium hover:text-white transition-colors"
                   >
                     이용 가이드
@@ -118,33 +123,34 @@ export function Footer() {
           <div className="border-t border-gray-800 mt-8 pt-8 text-sm text-gray-400 text-center">
             <p>© 2025 그리움 이음. All rights reserved.</p>
             <p className="mt-2 flex items-center justify-center gap-1">
-              Made with <Heart className="w-4 h-4 text-red-500" /> for remembrance
+              Made with <Heart className="w-4 h-4 text-red-500" /> for
+              remembrance
             </p>
           </div>
         </div>
       </footer>
       <FaqDialog
-        open={activeDialog === 'faq'}
+        open={activeDialog === "faq"}
         onOpenChange={() => setActiveDialog(null)}
       />
       <InquiryDialog
-        open={activeDialog === 'inquiry'}
+        open={activeDialog === "inquiry"}
         onOpenChange={() => setActiveDialog(null)}
       />
       <GuideDialog
-        open={activeDialog === 'guide'}
+        open={activeDialog === "guide"}
         onOpenChange={() => setActiveDialog(null)}
       />
       <TermsDialog
-        open={activeDialog === 'terms'}
+        open={activeDialog === "terms"}
         onOpenChange={() => setActiveDialog(null)}
       />
       <PrivacyDialog
-        open={activeDialog === 'privacy'}
+        open={activeDialog === "privacy"}
         onOpenChange={() => setActiveDialog(null)}
       />
       <AccessibilityDialog
-        open={activeDialog === 'accessibility'}
+        open={activeDialog === "accessibility"}
         onOpenChange={() => setActiveDialog(null)}
       />
     </>
