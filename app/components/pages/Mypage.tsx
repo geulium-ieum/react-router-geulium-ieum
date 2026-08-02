@@ -18,18 +18,37 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import moment from "moment";
 import { tributeService } from "~/lib/services/tribute";
 import { toast } from "sonner";
+import { memorialService } from "~/lib/services/memorial";
+import type { Status, Visibility } from "~/types";
 
-const visibilityOptions = [
-    { value: "PUBLIC", label: "공개", className: "rounded-full bg-blue-100 text-blue-500!" },
-    { value: "PRIVATE", label: "비공개", className: "rounded-full bg-red-100 text-red-500!" },
-];
+const isPublicOptions: {
+    value: Boolean
+    label: string
+    className: string
+}[] = [
+        { value: true, label: "공개", className: "rounded-full bg-blue-100 text-blue-500!" },
+        { value: false, label: "비공개", className: "rounded-full bg-red-100 text-red-500!" },
+    ];
 
-const statusOptions = [
-    { value: "PENDING", label: "승인 대기 중", className: "rounded-full bg-yellow-100 text-yellow-500!" },
-    { value: "REJECT", label: "거절", className: "rounded-full bg-red-100 text-red-500!" },
-    { value: "APPROVED", label: "승인", className: "rounded-full bg-green-100 text-green-500!" },
-    { value: "CANCEL", label: "취소", className: "rounded-full bg-gray-100 text-gray-500!" },
-];
+const visibilityOptions: {
+    value: Visibility
+    label: string
+    className: string
+}[] = [
+        { value: "PUBLIC" as Visibility, label: "공개", className: "rounded-full bg-blue-100 text-blue-500!" },
+        { value: "PRIVATE" as Visibility, label: "비공개", className: "rounded-full bg-red-100 text-red-500!" },
+    ];
+
+const statusOptions: {
+    value: Status
+    label: string
+    className: string
+}[] = [
+        { value: "PENDING", label: "승인 대기 중", className: "rounded-full bg-yellow-100 text-yellow-500!" },
+        { value: "REJECT", label: "거절", className: "rounded-full bg-red-100 text-red-500!" },
+        { value: "APPROVED", label: "승인", className: "rounded-full bg-green-100 text-green-500!" },
+        { value: "CANCEL", label: "취소", className: "rounded-full bg-gray-100 text-gray-500!" },
+    ];
 
 export async function loader({ request, context }: Route.LoaderArgs) {
     const user = context.get(userContext);
@@ -94,23 +113,33 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
     const [marketingAgreed, setMarketingAgreed] = useState<"true" | "false">(String(user.marketingAgreed) as "true" | "false" || "false");
     const [selectedTributeId, setSelectedTributeId] = useState<string>("");
     const [tributeIsOpen, setTributeIsOpen] = useState<boolean>(false);
+    const [tributeDeleteIsOpen, setTributeDeleteIsOpen] = useState<boolean>(false);
     const [selectedMemorialId, setSelectedMemorialId] = useState<string>("");
     const [memorialIsOpen, setMemorialIsOpen] = useState<boolean>(false);
 
     const [isTributeEdit, setIsTributeEdit] = useState(false);
     const [tributeForm, setTributeForm] = useState({
         content: "",
-        visibility: "",
+        isPublic: false,
     });
     const [isMemorialEdit, setIsMemorialEdit] = useState(false);
-    const [memorialForm, setMemorialForm] = useState({
+    const [memorialForm, setMemorialForm] = useState<{
+        deceasedName: string
+        location: string
+        birthDate: string
+        deathDate: string
+        biography: string
+        visibility: Visibility
+        status: Status
+        photoUrl: string
+    }>({
         deceasedName: "",
         location: "",
         birthDate: "",
         deathDate: "",
         biography: "",
-        visibility: "",
-        status: "",
+        visibility: "PUBLIC",
+        status: "PENDING",
         photoUrl: "",
     });
 
@@ -149,11 +178,17 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
         if (tribute) {
             setTributeForm({
                 content: tribute.content,
-                visibility: tribute.isPublic ? "PUBLIC" : "PRIVATE",
+                isPublic: tribute.isPublic,
             });
         }
         setTributeIsOpen(true);
     };
+
+    const handleDeleteTributeDialog = (tributeId: string) => {
+        const tribute = myTributes.find((tribute) => tribute.id === tributeId);
+        setSelectedTributeId(tributeId);
+        setTributeDeleteIsOpen(true);
+    }
 
     const handleViewMemorial = (memorialId: string) => {
         const memorial = myMemorials.find((memorial) => memorial.id === memorialId);
@@ -179,7 +214,11 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
         if (!open) {
             setIsTributeEdit(false);
         }
-    }
+    };
+
+    const handleTributeDeleteOpenChange = () => {
+        setTributeDeleteIsOpen(!tributeDeleteIsOpen);
+    };
 
     const handleChangeTributeContent = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setTributeForm((prev) => ({ ...prev, content: e.target.value }));
@@ -189,8 +228,10 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
         e.preventDefault();
         if (isTributeEdit) {
             try {
-                await tributeService.put.tribute({
+                await tributeService.put.tributeDetail({
                     id: selectedTributeId,
+                    content: tributeForm.content,
+                    isPublic: tributeForm.isPublic,
                     token: token!
                 });
                 revalidator.revalidate();
@@ -198,10 +239,32 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
             } catch (error) {
                 console.error(error);
                 toast.error("추모글 수정에 실패했습니다.");
+            } finally {
+                setTributeForm({
+                    content: "",
+                    isPublic: false
+                });
+                setTributeIsOpen(false);
             }
         }
         setIsTributeEdit((prev) => !prev);
     };
+
+    const handleDeleteTribute = async () => {
+        try {
+            await tributeService.delete.tributeDetail({
+                id: selectedTributeId,
+                token
+            })
+            revalidator.revalidate();
+            toast.success("추모글을 삭제했습니다.");
+        } catch (error) {
+            console.error(error);
+            toast.error("추모글 삭제에 실패했습니다.")
+        } finally {
+            setTributeDeleteIsOpen(false);
+        }
+    }
 
     const handleMemorialOpenChange = (open: boolean) => {
         setMemorialIsOpen(open);
@@ -217,9 +280,46 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
     const handleToggleMemorialEdit = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         if (isMemorialEdit) {
-            // TODO: API 작업
+            try {
+                await memorialService.put.memorialDetail({
+                    id: selectedMemorialId,
+                    token,
+                    deceasedName: memorialForm.deceasedName,
+                    location: memorialForm.location,
+                    birthDate: memorialForm.birthDate,
+                    deathDate: memorialForm.deathDate,
+                    biography: memorialForm.biography,
+                    visibility: selectedMemorial!.visibility,
+                    status: memorialForm.status,
+                    photoUrl: ""
+                })
+            } catch (error) {
+                console.error(error);
+                toast.error("추모관 수정에 실패했습니다.");
+            } finally {
+                setMemorialForm({
+                    deceasedName: "",
+                    location: "",
+                    birthDate: "",
+                    deathDate: "",
+                    biography: "",
+                    visibility: "PUBLIC",
+                    status: "PENDING",
+                    photoUrl: ""
+                });
+                setMemorialIsOpen(false);
+            }
         }
         setIsMemorialEdit((prev) => !prev);
+    };
+
+    // TODO: 추모관 삭제 추가 필요
+    const handleDeleteMemorialDialog = () => {
+
+    };
+
+    const handleDeleteMemorial = async () => {
+
     };
 
     useEffect(() => {
@@ -316,11 +416,18 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
                                     <div className="flex items-center justify-end gap-2">
                                         <Button
                                             variant="outline"
+                                            className="cursor-pointer"
                                             onClick={() => handleViewTribute(tribute.id)}
                                         >
                                             수정
                                         </Button>
-                                        <Button variant="destructive">삭제</Button>
+                                        <Button
+                                            variant="destructive"
+                                            className="cursor-pointer"
+                                            onClick={() => handleDeleteTributeDialog(tribute.id)}
+                                        >
+                                            삭제
+                                        </Button>
                                     </div>
                                 </Card>
                             ))}
@@ -345,10 +452,10 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
                                             <Field>
                                                 <FieldLabel htmlFor="tribute-visibility">공개 여부</FieldLabel>
                                                 <Combobox
-                                                    items={visibilityOptions}
+                                                    items={isPublicOptions}
                                                     itemToStringValue={(option) => option.label}
-                                                    value={visibilityOptions.find((option) => option.value === tributeForm.visibility) ?? null}
-                                                    onValueChange={(option) => setTributeForm((prev) => ({ ...prev, visibility: option?.value ?? "" }))}
+                                                    value={isPublicOptions.find((option) => option.value === tributeForm.isPublic) ?? null}
+                                                    onValueChange={(option) => setTributeForm((prev) => ({ ...prev, visibility: option?.value ?? false }))}
                                                     disabled={!isTributeEdit}
                                                 >
                                                     <ComboboxInput id="tribute-visibility" placeholder="공개 여부를 선택해주세요" />
@@ -368,6 +475,7 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
                                         <DialogFooter>
                                             <Button
                                                 type="button"
+                                                className="cursor-pointer"
                                                 onClick={handleToggleTributeEdit}
                                             >
                                                 {isTributeEdit ? "완료" : "수정"}
@@ -375,12 +483,41 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
                                             <Button
                                                 type="button"
                                                 variant="outline"
+                                                className="cursor-pointer"
                                                 onClick={() => handleTributeOpenChange(false)}
                                             >
                                                 닫기
                                             </Button>
                                         </DialogFooter>
                                     </div>
+                                )}
+                            </DialogContent>
+                        </Dialog>
+                        <Dialog open={tributeDeleteIsOpen} onOpenChange={handleTributeDeleteOpenChange}>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>추모글 삭제</DialogTitle>
+                                </DialogHeader>
+                                {selectedTributeId && (
+                                    <>
+                                        <p>해당 추모글을 삭제하시겠습니까?</p>
+                                        <DialogFooter>
+                                            <Button
+                                                variant="destructive"
+                                                className="cursor-pointer"
+                                                onClick={handleDeleteTribute}
+                                            >
+                                                삭제
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                className="cursor-pointer"
+                                                onClick={handleTributeDeleteOpenChange}
+                                            >
+                                                닫기
+                                            </Button>
+                                        </DialogFooter>
+                                    </>
                                 )}
                             </DialogContent>
                         </Dialog>
@@ -486,7 +623,7 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
                                                     items={visibilityOptions}
                                                     itemToStringValue={(option) => option.label}
                                                     value={visibilityOptions.find((option) => option.value === memorialForm.visibility) ?? null}
-                                                    onValueChange={(option) => setMemorialForm((prev) => ({ ...prev, visibility: option?.value ?? "" }))}
+                                                    onValueChange={(option) => setMemorialForm((prev) => ({ ...prev, visibility: option?.value ?? "PUBLIC" }))}
                                                     disabled={!isMemorialEdit}
                                                 >
                                                     <ComboboxInput id="visibility" placeholder="공개 여부를 선택해주세요" />
@@ -520,6 +657,7 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
                                         <DialogFooter>
                                             <Button
                                                 type="button"
+                                                className="cursor-pointer"
                                                 onClick={handleToggleMemorialEdit}
                                             >
                                                 {isMemorialEdit ? "완료" : "수정"}
@@ -527,6 +665,7 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
                                             <Button
                                                 type="button"
                                                 variant="outline"
+                                                className="cursor-pointer"
                                                 onClick={() => handleMemorialOpenChange(false)}
                                             >
                                                 닫기

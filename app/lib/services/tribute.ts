@@ -1,5 +1,5 @@
 import type { ListParams } from "~/types";
-import { getTributeList, putTribute } from "../apis/tribute";
+import { deleteTributeDetail, getTributeList, putTributeDetail } from "../apis/tribute";
 
 class TributeService {
   public get = {
@@ -20,14 +20,37 @@ class TributeService {
 
   }
   public put = {
-    tribute: async ({
+    tributeDetail: async ({
+      id,
+      content,
+      isPublic,
+      token
+    }: {
+      id: string
+      content: string
+      isPublic: boolean
+      token: string
+    }) => {
+      return await putTributeDetail({
+        id,
+        content,
+        isPublic,
+        token
+      });
+    }
+  }
+  public delete = {
+    tributeDetail: async ({
       id,
       token
     }: {
       id: string
       token: string
     }) => {
-      return await putTribute({ id, token });
+      return await deleteTributeDetail({
+        id,
+        token
+      });
     }
   }
 }

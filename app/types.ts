@@ -52,7 +52,7 @@ export interface ListParams {
 }
 
 export type Status = "PENDING" | "REJECT" | "APPROVED" | "CANCEL";
-export type Visibility = "PUBLIC" | "PRIVATE";
+export type Visibility = "PUBLIC" | "PRIVATE" | "FAMILY_ONLY";
 
 // User
 export type User = v.InferOutput<typeof UserSchema>;

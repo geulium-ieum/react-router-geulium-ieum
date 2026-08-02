@@ -88,3 +88,47 @@ export async function postMemorial({
     throw error;
   }
 }
+
+export async function putMemorialDetail({
+  id,
+  token,
+  deceasedName,
+  location,
+  birthDate,
+  deathDate,
+  biography,
+  visibility,
+  status,
+  photoUrl
+}: {
+  id: string
+  token: string
+  deceasedName: string
+  location?: string
+  birthDate: string
+  deathDate: string
+  biography?: string
+  visibility: Visibility
+  status: Status
+  photoUrl: string
+}) {
+  try {
+    await http.put(`memorial/${id}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      },
+      json: {
+        deceasedName,
+        location,
+        birthDate,
+        deathDate,
+        biography,
+        visibility,
+        status,
+        photoUrl
+      }
+    });
+  } catch (error) {
+    throw error;
+  }
+}

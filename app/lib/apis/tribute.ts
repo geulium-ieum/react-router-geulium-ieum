@@ -22,7 +22,33 @@ export async function getTributeList({
   }
 }
 
-export async function putTribute({
+export async function putTributeDetail({
+  id,
+  content,
+  isPublic,
+  token
+}: {
+  id: string
+  content: string
+  isPublic: boolean
+  token: string
+}) {
+  try {
+    await http.put(`tribute/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      json: {
+        content,
+        isPublic
+      }
+    });
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function deleteTributeDetail({
   id,
   token
 }: {
@@ -30,7 +56,7 @@ export async function putTribute({
   token: string
 }) {
   try {
-    await http.put(`tribute/${id}`, {
+    await http.delete(`tribute/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }

@@ -1,5 +1,5 @@
 import type { ListParams, MemorialFilterProps, Status, Visibility } from "~/types";
-import { getMemorialFilter, getMemorialList, postMemorial } from "~/lib/apis/memorial";
+import { getMemorialFilter, getMemorialList, postMemorial, putMemorialDetail } from "~/lib/apis/memorial";
 
 class MemorialService {
   public get = {
@@ -55,6 +55,44 @@ class MemorialService {
       photoUrl: string
     }) => {
       return await postMemorial({
+        token,
+        deceasedName,
+        location,
+        birthDate,
+        deathDate,
+        biography,
+        visibility,
+        status,
+        photoUrl
+      });
+    }
+  }
+  public put = {
+    memorialDetail: async ({
+      id,
+      token,
+      deceasedName,
+      location,
+      birthDate,
+      deathDate,
+      biography,
+      visibility,
+      status,
+      photoUrl
+    }: {
+      id: string
+      token: string
+      deceasedName: string
+      location?: string
+      birthDate: string
+      deathDate: string
+      biography?: string
+      visibility: Visibility
+      status: Status
+      photoUrl: string
+    }) => {
+      return await putMemorialDetail({
+        id,
         token,
         deceasedName,
         location,
