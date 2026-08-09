@@ -116,6 +116,7 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
     const [tributeDeleteIsOpen, setTributeDeleteIsOpen] = useState<boolean>(false);
     const [selectedMemorialId, setSelectedMemorialId] = useState<string>("");
     const [memorialIsOpen, setMemorialIsOpen] = useState<boolean>(false);
+    const [deleteMemorialIsOpen, setDeleteMemorialIsOpen] = useState<boolean>(false);
 
     const [isTributeEdit, setIsTributeEdit] = useState(false);
     const [tributeForm, setTributeForm] = useState({
@@ -313,13 +314,26 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
         setIsMemorialEdit((prev) => !prev);
     };
 
-    // TODO: 추모관 삭제 추가 필요
     const handleDeleteMemorialDialog = () => {
-
+        setDeleteMemorialIsOpen(true);
     };
 
     const handleDeleteMemorial = async () => {
-
+        try {
+            await memorialService.delete.memorialDetail({
+                id: selectedMemorialId,
+                token
+            });
+            toast.success("추모관을 삭제했습니다.");
+            revalidator.revalidate();
+            setMemorialIsOpen(false);
+            setSelectedMemorialId("");
+        } catch (error) {
+            console.error(error);
+            toast.error("추모관 삭제에 실패했습니다.");
+        } finally {
+            setDeleteMemorialIsOpen(false);
+        }
     };
 
     useEffect(() => {
@@ -656,6 +670,14 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
                                         </dl>
                                         <DialogFooter>
                                             <Button
+                                                variant="destructive"
+                                                type="button"
+                                                className="cursor-pointer"
+                                                onClick={handleDeleteMemorialDialog}
+                                            >
+                                                삭제
+                                            </Button>
+                                            <Button
                                                 type="button"
                                                 className="cursor-pointer"
                                                 onClick={handleToggleMemorialEdit}
@@ -673,6 +695,32 @@ export default function Mypage({ loaderData, actionData }: Route.ComponentProps)
                                         </DialogFooter>
                                     </div>
                                 )}
+                            </DialogContent>
+                        </Dialog>
+                        <Dialog open={deleteMemorialIsOpen} onOpenChange={setDeleteMemorialIsOpen}>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>
+                                        추모관 삭제
+                                    </DialogTitle>
+                                </DialogHeader>
+                                정말로 추모관을 삭제하시겠습니까?
+                                <DialogFooter>
+                                    <Button
+                                        variant="destructive"
+                                        className="cursor-pointer"
+                                        onClick={handleDeleteMemorial}
+                                    >
+                                        삭제
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="cursor-pointer"
+                                        onClick={() => setDeleteMemorialIsOpen(false)}
+                                    >
+                                        취소
+                                    </Button>
+                                </DialogFooter>
                             </DialogContent>
                         </Dialog>
                     </CardContent>

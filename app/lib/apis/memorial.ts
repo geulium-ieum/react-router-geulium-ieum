@@ -132,3 +132,21 @@ export async function putMemorialDetail({
     throw error;
   }
 }
+
+export async function deleteMemorialDetail({
+  id,
+  token
+}: {
+  id: string
+  token: string
+}) {
+  try {
+    await http.delete(`memorial/${id}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+  } catch (error) {
+    throw error;
+  }
+}

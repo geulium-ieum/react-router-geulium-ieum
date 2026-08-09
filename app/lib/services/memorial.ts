@@ -1,5 +1,5 @@
 import type { ListParams, MemorialFilterProps, Status, Visibility } from "~/types";
-import { getMemorialFilter, getMemorialList, postMemorial, putMemorialDetail } from "~/lib/apis/memorial";
+import { deleteMemorialDetail, getMemorialFilter, getMemorialList, postMemorial, putMemorialDetail } from "~/lib/apis/memorial";
 
 class MemorialService {
   public get = {
@@ -102,6 +102,20 @@ class MemorialService {
         visibility,
         status,
         photoUrl
+      });
+    }
+  }
+  public delete = {
+    memorialDetail: async ({
+      id,
+      token
+    }: {
+      id: string
+      token: string
+    }) => {
+      return await deleteMemorialDetail({
+        id,
+        token
       });
     }
   }
