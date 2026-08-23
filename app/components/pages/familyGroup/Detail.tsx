@@ -5,23 +5,44 @@ import { redirect, useNavigate } from "react-router";
 import { familyGroupService } from "~/lib/services/familyGroup";
 import { userService } from "~/lib/services/user";
 import { Button } from "~/components/ui/button";
-import { ArrowLeftIcon, PlusIcon, StickyNoteOff, Trash2, UserRoundX, Users } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  PlusIcon,
+  StickyNoteOff,
+  Trash2,
+  UserRoundX,
+  Users,
+} from "lucide-react";
 import FlexDiv from "~/components/FlexDiv";
 import { Card } from "~/components/ui/card";
 import moment from "moment";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { useState } from "react";
 import RegisterMemorialHallDialog from "~/components/organisms/RegisterMemorialHallDialog";
 import { toast } from "sonner";
 import type { FamilyGroupMember, User } from "~/types";
-import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "~/components/ui/combobox";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "~/components/ui/combobox";
 import { useRevalidator } from "react-router";
 
 interface MemberRole {
-  value: FamilyGroupMember["role"]
-  label: "일반" | "관리자" | ""
+  value: FamilyGroupMember["role"];
+  label: "일반" | "관리자" | "";
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
@@ -30,7 +51,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const session = await getSession(cookie);
   const token = session.get("token");
   if (!user || !token) {
-    return redirect('/login');
+    return redirect("/login");
   }
   const pathname = new URL(request.url).pathname;
   const id = pathname.split("/").pop();
@@ -39,28 +60,30 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   }
   const familyGroupDetail = await familyGroupService.get.familyGroupDetail({
     id,
-    token
+    token,
   });
-  const { content: memberContent } = await familyGroupService.get.familyGroupMemberList({
-    id,
-    token
-  });
+  const { content: memberContent } =
+    await familyGroupService.get.familyGroupMemberList({
+      id,
+      token,
+    });
   const members = await Promise.all(
     memberContent.map(async (member) => {
       const user = await userService.get.user({
         id: member.userId,
-        token
-      })
+        token,
+      });
       return {
         ...member,
-        user
-      }
-    })
-  )
-  const { content: memorialContent } = await familyGroupService.get.familyGroupMemorialList({
-    id,
-    token
-  });
+        user,
+      };
+    }),
+  );
+  const { content: memorialContent } =
+    await familyGroupService.get.familyGroupMemorialList({
+      id,
+      token,
+    });
 
   return {
     id,
@@ -68,36 +91,34 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     token,
     familyGroupDetail,
     members,
-    memorialContent
+    memorialContent,
   };
 }
 
 const memberRoles: MemberRole[] = [
   {
     value: "member",
-    label: "일반"
+    label: "일반",
   },
   {
     value: "admin",
-    label: "관리자"
-  }
+    label: "관리자",
+  },
 ];
 
-export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) {
-  const {
-    id,
-    user,
-    token,
-    familyGroupDetail,
-    members,
-    memorialContent
-  } = loaderData;
+export default function FamilyGroupDetail({
+  loaderData,
+}: Route.ComponentProps) {
+  const { id, user, token, familyGroupDetail, members, memorialContent } =
+    loaderData;
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState<boolean>(false);
   const [inviteEmail, setInviteEmail] = useState<string>("");
   const [inviteRole, setInviteRole] = useState<MemberRole["label"]>("");
   const [inviteRelationship, setInviteRelationship] = useState<string>("");
-  const [isDeleteMemberDialogOpen, setIsDeleteMemberDialogOpen] = useState<boolean>(false);
-  const [isDeleteGroupDialogOpen, setIsDeleteGroupDialogOpen] = useState<boolean>(false);
+  const [isDeleteMemberDialogOpen, setIsDeleteMemberDialogOpen] =
+    useState<boolean>(false);
+  const [isDeleteGroupDialogOpen, setIsDeleteGroupDialogOpen] =
+    useState<boolean>(false);
   const [isAddMemorialOpen, setIsAddMemorialOpen] = useState<boolean>(false);
 
   const revalidator = useRevalidator();
@@ -114,7 +135,7 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
       await familyGroupService.delete.familyGroupMember({
         token,
         id,
-        userId
+        userId,
       });
       revalidator.revalidate();
       setIsDeleteMemberDialogOpen(false);
@@ -131,7 +152,7 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
         token,
         email: inviteEmail,
         role: inviteRole === "일반" ? "member" : "admin",
-        relationship: inviteRelationship
+        relationship: inviteRelationship,
       });
       setIsInviteDialogOpen(false);
       setInviteEmail("");
@@ -154,14 +175,14 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
     try {
       await familyGroupService.delete.familyGroup({
         id,
-        token
+        token,
       });
       toast.success("그룹을 삭제했습니다");
       navigate("/family-groups", { replace: true });
     } catch (error) {
       toast.error("그룹 제거에 실패했습니다.");
     }
-  }
+  };
 
   return (
     <div className="max-w-7xl mx-auto min-h-[calc(100vh-398px)] px-4 sm:px-6 lg:px-8 py-12">
@@ -180,8 +201,12 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
             <div className="w-16 h-16 bg-linear-to-br from-purple-600 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
               <Users className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-2xl text-center mb-2">{familyGroupDetail.name}</h2>
-            <p className="text-gray-600 text-center text-sm mb-6">{familyGroupDetail.description}</p>
+            <h2 className="text-2xl text-center mb-2">
+              {familyGroupDetail.name}
+            </h2>
+            <p className="text-gray-600 text-center text-sm mb-6">
+              {familyGroupDetail.description}
+            </p>
 
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
@@ -194,70 +219,85 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">생성일</span>
-                <span>{moment(familyGroupDetail.createdAt).format('YYYY-MM-DD HH:mm:ss')}</span>
+                <span>
+                  {moment(familyGroupDetail.createdAt).format(
+                    "YYYY-MM-DD HH:mm:ss",
+                  )}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">내 권한</span>
-                <span>{user.id === familyGroupDetail.ownerId ? '관리자' : '멤버'}</span>
+                <span>
+                  {user.id === familyGroupDetail.ownerId ? "관리자" : "멤버"}
+                </span>
               </div>
             </div>
           </Card>
           <Card className="p-6">
             <h3 className="text-xl mb-6">그룹 멤버</h3>
             <div className="space-y-4">
-              {members.length > 0 ? members.map(member => (
-                <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <p className="flex items-center gap-2">
-                        {member.user.name}
-                        {member.role === 'admin' && (
-                          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">관리자</span>
-                        )}
-                      </p>
-                      <p className="text-sm text-gray-600">{member.user.email}</p>
-                      <p className="text-xs text-gray-500">
-                        {/* 가입일: {member.user.toLocaleDateString('ko-KR')} */}
-                      </p>
+              {members.length > 0 ? (
+                members.map((member) => (
+                  <div
+                    key={member.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div>
+                        <p className="flex items-center gap-2">
+                          {member.user.name}
+                          {member.role === "admin" && (
+                            <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
+                              관리자
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {member.user.email}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {/* 가입일: {member.user.toLocaleDateString('ko-KR')} */}
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  {user.id === familyGroupDetail.ownerId && (
-                    <Dialog open={isDeleteMemberDialogOpen} onOpenChange={setIsDeleteMemberDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>멤버 삭제</DialogTitle>
-                          <DialogDescription>
-                            정말 이 멤버를 삭제하시겠습니까?
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="flex justify-end gap-3">
-                          <Button
-                            variant="destructive"
-                            onClick={() => handleSelectedDeleteMember(member)}
-                          >
-                            삭제
+                    {user.id === familyGroupDetail.ownerId && (
+                      <Dialog
+                        open={isDeleteMemberDialogOpen}
+                        onOpenChange={setIsDeleteMemberDialogOpen}
+                      >
+                        <DialogTrigger asChild>
+                          <Button size="sm" variant="destructive">
+                            <Trash2 className="size-4" />
                           </Button>
-                          <Button
-                            variant="outline"
-                            onClick={() => setIsDeleteGroupDialogOpen(false)}
-                          >
-                            취소
-                          </Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  )}
-                </div>
-              )) : (
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>멤버 삭제</DialogTitle>
+                            <DialogDescription>
+                              정말 이 멤버를 삭제하시겠습니까?
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="flex justify-end gap-3">
+                            <Button
+                              variant="destructive"
+                              onClick={() => handleSelectedDeleteMember(member)}
+                            >
+                              삭제
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => setIsDeleteMemberDialogOpen(false)}
+                            >
+                              취소
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </div>
+                ))
+              ) : (
                 <FlexDiv className="flex-col w-full h-full justify-center items-center gap-y-4">
                   <FlexDiv className="flex-col justify-center items-center gap-y-2">
                     <UserRoundX size={128} />
@@ -296,15 +336,24 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
                             <Label>권한</Label>
                             <Combobox
                               items={memberRoles}
-                              itemToStringValue={(role: MemberRole) => role.label}
-                              onInputValueChange={(e) => setInviteRole(e as MemberRole["label"])}
+                              itemToStringValue={(role: MemberRole) =>
+                                role.label
+                              }
+                              onInputValueChange={(e) =>
+                                setInviteRole(e as MemberRole["label"])
+                              }
                             >
                               <ComboboxInput placeholder="부여할 권한을 선택해주세요" />
                               <ComboboxContent className="pointer-events-auto">
-                                <ComboboxEmpty>검색 결과가 없습니다</ComboboxEmpty>
+                                <ComboboxEmpty>
+                                  검색 결과가 없습니다
+                                </ComboboxEmpty>
                                 <ComboboxList>
                                   {(role) => (
-                                    <ComboboxItem key={role.value} value={role.label}>
+                                    <ComboboxItem
+                                      key={role.value}
+                                      value={role.label}
+                                    >
                                       {role.label}
                                     </ComboboxItem>
                                   )}
@@ -319,14 +368,14 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
                                 id="invite-relationship"
                                 placeholder="예시) 부"
                                 value={inviteRelationship}
-                                onChange={(e) => setInviteRelationship(e.target.value)}
+                                onChange={(e) =>
+                                  setInviteRelationship(e.target.value)
+                                }
                               />
                             </FlexDiv>
                           </div>
                           <div className="flex justify-end gap-3">
-                            <Button onClick={handleInviteMember}>
-                              초대
-                            </Button>
+                            <Button onClick={handleInviteMember}>초대</Button>
                             <Button
                               variant="outline"
                               onClick={handleInviteCancel}
@@ -347,7 +396,7 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
           <h3 className="text-xl mb-6">추모관</h3>
           {memorialContent.length > 0 ? (
             <FlexDiv className="flex-col gap-y-6">
-              {memorialContent.map(memorial => (
+              {memorialContent.map((memorial) => (
                 <Card key={memorial.id}>
                   <h3 className="text-xl mb-6">추모관 목록</h3>
                 </Card>
@@ -362,8 +411,7 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
                 </FlexDiv>
                 {familyGroupDetail.ownerId === user.id && (
                   <Button onClick={() => setIsAddMemorialOpen(true)}>
-                    <PlusIcon size={24} />
-                    새 추모관 등록
+                    <PlusIcon size={24} />새 추모관 등록
                   </Button>
                 )}
               </FlexDiv>
@@ -378,7 +426,10 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
       </div>
       {user.id === familyGroupDetail.ownerId && (
         <FlexDiv className="justify-end">
-          <Dialog open={isDeleteGroupDialogOpen} onOpenChange={setIsDeleteGroupDialogOpen}>
+          <Dialog
+            open={isDeleteGroupDialogOpen}
+            onOpenChange={setIsDeleteGroupDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button variant="destructive">
                 <Trash2 className="w-4 h-4 mr-2" />
@@ -393,10 +444,7 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
                 </DialogDescription>
               </DialogHeader>
               <div className="flex justify-end gap-3">
-                <Button
-                  variant="destructive"
-                  onClick={handleDeleteGroup}
-                >
+                <Button variant="destructive" onClick={handleDeleteGroup}>
                   삭제
                 </Button>
                 <Button
@@ -411,5 +459,5 @@ export default function FamilyGroupDetail({ loaderData }: Route.ComponentProps) 
         </FlexDiv>
       )}
     </div>
-  )
+  );
 }

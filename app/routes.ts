@@ -1,4 +1,10 @@
-import { type RouteConfig, index, layout, prefix, route } from "@react-router/dev/routes";
+import {
+  type RouteConfig,
+  index,
+  layout,
+  prefix,
+  route,
+} from "@react-router/dev/routes";
 
 export default [
   layout("./components/layout.tsx", [
@@ -6,11 +12,10 @@ export default [
     route("/guides", "./components/pages/Guides.tsx"),
     route("/register", "./components/pages/Register.tsx"),
     route("/login", "./components/pages/Login.tsx"),
-    route("/my", "./components/pages/My.tsx"),
     ...prefix("family-groups", [
       index("./components/pages/familyGroup/Home.tsx"),
       route("/join", "./components/pages/familyGroup/Join.tsx"),
-      route(":id", "./components/pages/familyGroup/Detail.tsx")
+      route(":id", "./components/pages/familyGroup/Detail.tsx"),
     ]),
     route("/auth/verify-email", "./components/pages/VerifyEmail.tsx"),
     route("/auth/naver/login", "./components/NaverLogin.tsx"),
