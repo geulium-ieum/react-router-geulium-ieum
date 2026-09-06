@@ -37,6 +37,7 @@ import { userContext } from "~/context/userContext";
 import type { MemorialFilter } from "~/types";
 import RegisterMemorialHallDialog from "~/components/organisms/RegisterMemorialHallDialog";
 import { getSession } from "~/lib/sessions.server";
+import { Link } from "react-router";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const user = context.get(userContext);
@@ -54,8 +55,8 @@ export async function action({ request }: Route.ActionArgs) {
   try {
     const response = await memorialService.get.memorialFilter({
       name: name as string,
-      birthDate: birthDate ? birthDate as string : undefined,
-      deathDate: deathDate ? deathDate as string : undefined
+      birthDate: birthDate ? (birthDate as string) : undefined,
+      deathDate: deathDate ? (deathDate as string) : undefined,
     });
     return response.content;
   } catch (error) {
@@ -65,7 +66,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function SearchDeceased({
   loaderData,
-  actionData
+  actionData,
 }: Route.ComponentProps) {
   const { user, token } = loaderData;
   const [searchParams, setSearchParams] = useState({
@@ -90,17 +91,13 @@ export default function SearchDeceased({
       <div className="max-w-7xl min-h-[calc(100vh-398px)] mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl text-gray-900 mb-2">
-              고인 검색
-            </h1>
+            <h1 className="text-3xl text-gray-900 mb-2">고인 검색</h1>
             <p className="text-gray-600">
               고인의 정보를 입력하여 추모관을 찾아보세요
             </p>
           </div>
           {user && (
-            <Button
-              onClick={() => setIsRegisterDialogOpen(true)}
-            >
+            <Button onClick={() => setIsRegisterDialogOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />새 추모관 등록
             </Button>
           )}
@@ -178,18 +175,11 @@ export default function SearchDeceased({
             </div>
 
             <div className="flex gap-3">
-              <Button
-                type="submit"
-                className="flex-1 md:flex-initial"
-              >
+              <Button type="submit" className="flex-1 md:flex-initial">
                 <Search className="w-4 h-4 mr-2" />
                 검색
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleReset}
-              >
+              <Button type="button" variant="outline" onClick={handleReset}>
                 초기화
               </Button>
             </div>
@@ -200,10 +190,7 @@ export default function SearchDeceased({
         {actionData && (
           <div className="mb-6">
             <p className="text-gray-600">
-              총{" "}
-              <span className="text-purple-600">
-                {actionData?.length}
-              </span>
+              총 <span className="text-purple-600">{actionData?.length}</span>
               개의 추모관을 찾았습니다
             </p>
           </div>
@@ -212,72 +199,72 @@ export default function SearchDeceased({
         {actionData && actionData.length > 0 && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {actionData?.map((deceased) => (
-              <Card
-                key={deceased.id}
-                className="overflow-hidden py-0 hover:shadow-lg transition-shadow cursor-pointer"
-                // onClick={() => onViewMemorial(deceased.id)}
-              >
-                <div className="aspect-square relative overflow-hidden bg-gray-200">
-                  {deceased.visibility === "PRIVATE" && (
-                    <div className="absolute top-3 right-3">
-                      <Badge
-                        variant="secondary"
-                        className="bg-gray-900/80 text-white"
-                      >
-                        <Lock className="w-3 h-3 mr-1" />
-                        비공개
-                      </Badge>
-                    </div>
-                  )}
-                  {deceased.visibility === "PUBLIC" && (
-                    <>
-                      {deceased.photoUrl && (
-                        <img
-                          src={deceased.photoUrl}
-                          alt={deceased.deceasedName}
-                          className="w-full h-auto object-cover"
-                        />
-                      )}
+              <Link to={`/memorial/${deceased.id}`} key={deceased.id}>
+                <Card
+                  key={deceased.id}
+                  className="overflow-hidden py-0 hover:shadow-lg transition-shadow cursor-pointer"
+                  // onClick={() => onViewMemorial(deceased.id)}
+                >
+                  <div className="aspect-square relative overflow-hidden bg-gray-200">
+                    {deceased.visibility === "PRIVATE" && (
                       <div className="absolute top-3 right-3">
                         <Badge
                           variant="secondary"
-                          className="bg-white/80 text-gray-900"
+                          className="bg-gray-900/80 text-white"
                         >
-                          <Globe className="w-3 h-3 mr-1" />
-                          공개
+                          <Lock className="w-3 h-3 mr-1" />
+                          비공개
                         </Badge>
                       </div>
-                    </>
-                  )}
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl mb-3">
-                    {deceased.deceasedName}
-                  </h3>
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <p className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      {deceased.birthDate.replace(
-                        /-/g,
-                        ".",
-                      )} ~ {deceased.deathDate.replace(/-/g, ".")}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
-                      {deceased.location}
-                    </p>
+                    )}
+                    {deceased.visibility === "PUBLIC" && (
+                      <>
+                        {deceased.photoUrl && (
+                          <img
+                            src={deceased.photoUrl}
+                            alt={deceased.deceasedName}
+                            className="w-full h-auto object-cover"
+                          />
+                        )}
+                        <div className="absolute top-3 right-3">
+                          <Badge
+                            variant="secondary"
+                            className="bg-white/80 text-gray-900"
+                          >
+                            <Globe className="w-3 h-3 mr-1" />
+                            공개
+                          </Badge>
+                        </div>
+                      </>
+                    )}
                   </div>
-                  <Button
-                    className="w-full mt-4"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // onViewMemorial(deceased.id);
-                    }}
-                  >
-                    추모관 방문
-                  </Button>
-                </div>
-              </Card>
+                  <div className="p-6">
+                    <h3 className="text-xl mb-3">{deceased.deceasedName}</h3>
+                    <div className="space-y-2 text-sm text-gray-600">
+                      <p className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        {deceased.birthDate.replace(/-/g, ".")} ~{" "}
+                        {deceased.deathDate.replace(/-/g, ".")}
+                      </p>
+                      <p className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        {deceased.location}
+                      </p>
+                    </div>
+                    <Link to={`/memorial/${deceased.id}`}>
+                      <Button
+                        className="w-full mt-4"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // onViewMemorial(deceased.id);
+                        }}
+                      >
+                        추모관 방문
+                      </Button>
+                    </Link>
+                  </div>
+                </Card>
+              </Link>
             ))}
           </div>
         )}
@@ -287,12 +274,8 @@ export default function SearchDeceased({
             <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
               <Search className="w-10 h-10 text-gray-400" />
             </div>
-            <h3 className="text-xl text-gray-900 mb-2">
-              검색 결과가 없습니다
-            </h3>
-            <p className="text-gray-600">
-              다른 검색어로 다시 시도해보세요
-            </p>
+            <h3 className="text-xl text-gray-900 mb-2">검색 결과가 없습니다</h3>
+            <p className="text-gray-600">다른 검색어로 다시 시도해보세요</p>
           </div>
         )}
       </div>

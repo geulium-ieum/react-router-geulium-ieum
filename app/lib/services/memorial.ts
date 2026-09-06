@@ -1,17 +1,25 @@
-import type { ListParams, MemorialFilterProps, Status, Visibility } from "~/types";
-import { deleteMemorialDetail, getMemorialFilter, getMemorialList, postMemorial, putMemorialDetail } from "~/lib/apis/memorial";
+import type {
+  ListParams,
+  MemorialFilterProps,
+  Status,
+  Visibility,
+} from "~/types";
+import {
+  deleteMemorialDetail,
+  getMemorialFilter,
+  getMemorialDetail,
+  getMemorialList,
+  postMemorial,
+  putMemorialDetail,
+} from "~/lib/apis/memorial";
 
 class MemorialService {
   public get = {
-    memorialList: async ({
-      page,
-      size,
-      sort
-    }: ListParams) => {
+    memorialList: async ({ page, size, sort }: ListParams) => {
       return await getMemorialList({
         page,
         size,
-        sort
+        sort,
       });
     },
     memorialFilter: async ({
@@ -20,7 +28,7 @@ class MemorialService {
       deathDate,
       page,
       size,
-      sort
+      sort,
     }: MemorialFilterProps) => {
       return await getMemorialFilter({
         name,
@@ -28,10 +36,16 @@ class MemorialService {
         deathDate,
         page,
         size,
-        sort
+        sort,
       });
-    }
-  }
+    },
+    memorialDetail: async ({ id, token }: { id: string; token?: string }) => {
+      return await getMemorialDetail({
+        id,
+        token,
+      });
+    },
+  };
   public post = {
     memorial: async ({
       token,
@@ -42,17 +56,17 @@ class MemorialService {
       biography,
       visibility,
       status,
-      photoUrl
+      photoUrl,
     }: {
-      token: string
-      deceasedName: string
-      location?: string
-      birthDate: string
-      deathDate: string
-      biography?: string
-      visibility: Visibility
-      status: Status
-      photoUrl: string
+      token: string;
+      deceasedName: string;
+      location?: string;
+      birthDate: string;
+      deathDate: string;
+      biography?: string;
+      visibility: Visibility;
+      status: Status;
+      photoUrl: string;
     }) => {
       return await postMemorial({
         token,
@@ -63,10 +77,10 @@ class MemorialService {
         biography,
         visibility,
         status,
-        photoUrl
+        photoUrl,
       });
-    }
-  }
+    },
+  };
   public put = {
     memorialDetail: async ({
       id,
@@ -78,18 +92,18 @@ class MemorialService {
       biography,
       visibility,
       status,
-      photoUrl
+      photoUrl,
     }: {
-      id: string
-      token: string
-      deceasedName: string
-      location?: string
-      birthDate: string
-      deathDate: string
-      biography?: string
-      visibility: Visibility
-      status: Status
-      photoUrl: string
+      id: string;
+      token: string;
+      deceasedName: string;
+      location?: string;
+      birthDate: string;
+      deathDate: string;
+      biography?: string;
+      visibility: Visibility;
+      status: Status;
+      photoUrl: string;
     }) => {
       return await putMemorialDetail({
         id,
@@ -101,24 +115,18 @@ class MemorialService {
         biography,
         visibility,
         status,
-        photoUrl
+        photoUrl,
       });
-    }
-  }
+    },
+  };
   public delete = {
-    memorialDetail: async ({
-      id,
-      token
-    }: {
-      id: string
-      token: string
-    }) => {
+    memorialDetail: async ({ id, token }: { id: string; token: string }) => {
       return await deleteMemorialDetail({
         id,
-        token
+        token,
       });
-    }
-  }
+    },
+  };
 }
 
 export const memorialService = new MemorialService();

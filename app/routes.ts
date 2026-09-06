@@ -27,6 +27,7 @@ export default [
     route("/web", "./components/pages/policy/Web.tsx"),
     route("/privacy", "./components/pages/policy/Privacy.tsx"),
     route("/search", "./components/pages/SearchDeceased.tsx"),
+    route("/memorial/:id", "./components/pages/MemorialDetail.tsx"),
     route("/mypage", "./components/pages/Mypage.tsx"),
     route("/announcements", "./components/pages/Announcements.tsx"),
     route("/announcements/:id", "./components/pages/AnnouncementsDetail.tsx"),

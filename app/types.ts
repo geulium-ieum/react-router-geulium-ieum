@@ -1,6 +1,6 @@
 import * as v from 'valibot';
 import type { TokenSchema, UserSchema } from '~/constants/user';
-import type { MemorialSchema } from '~/constants/memorial';
+import type { MemorialItemSchema, MemorialSchema } from '~/constants/memorial';
 import type { FamilyGroupDetailSchema, FamilyGroupMemberSchema, FamilyGroupSchema } from './constants/familyGroup';
 
 export type Page =
@@ -59,6 +59,7 @@ export type User = v.InferOutput<typeof UserSchema>;
 export type UserRole = "USER" | "ADMIN" | "SUPER_ADMIN";
 
 // Memorial
+export type Memorial = v.InferOutput<typeof MemorialItemSchema>;
 export type MemorialFilter = v.InferOutput<typeof MemorialSchema>;
 
 // Family Group
