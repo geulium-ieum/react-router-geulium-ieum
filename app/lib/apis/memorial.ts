@@ -1,7 +1,12 @@
 import { http } from "~/lib/utils";
 import * as v from "valibot";
-import { MemorialItemSchema, MemorialSchema } from "~/constants/memorial";
+import {
+  MemorialItemSchema,
+  MemorialSchema,
+  MemorialPostSchema,
+} from "~/constants/memorial";
 import type {
+  PostListParams,
   ListParams,
   MemorialFilterProps,
   Status,
@@ -82,6 +87,36 @@ export async function getMemorialDetail({
       return list.output.content[0];
     }
     throw item.issues;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getMemorialPostList({
+  id,
+  token,
+  page,
+  size,
+  sort,
+}: PostListParams) {
+  try {
+    const response = await http
+      .get(`tribute/memorial/${id}/list`, {
+        headers: token
+          ? {
+              Authorization: `Bearer ${token}`,
+            }
+          : undefined,
+        searchParams: {
+          page,
+          size,
+          sort: sort
+            ?.map(({ field, direction }) => `${field},${direction}`)
+            .join(","),
+        },
+      })
+      .json();
+    return v.parse(MemorialPostSchema, response);
   } catch (error) {
     throw error;
   }

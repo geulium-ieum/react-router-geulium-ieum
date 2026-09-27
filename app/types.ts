@@ -1,24 +1,38 @@
-import * as v from 'valibot';
-import type { TokenSchema, UserSchema } from '~/constants/user';
-import type { MemorialItemSchema, MemorialSchema } from '~/constants/memorial';
-import type { FamilyGroupDetailSchema, FamilyGroupMemberSchema, FamilyGroupSchema } from './constants/familyGroup';
+import * as v from "valibot";
+import type { TokenSchema, UserSchema } from "~/constants/user";
+import type {
+  MemorialItemSchema,
+  MemorialPostItemSchema,
+  MemorialPostSchema,
+  MemorialSchema,
+} from "~/constants/memorial";
+import type {
+  FamilyGroupDetailSchema,
+  FamilyGroupMemberSchema,
+  FamilyGroupSchema,
+} from "./constants/familyGroup";
 
 export type Page =
-  | 'home'
-  | 'login'
-  | 'register'
-  | 'search'
-  | 'memorial'
-  | 'my'
-  | 'admin-dashboard'
-  | 'admin-mypage'
-  | 'family-groups'
-  | 'notifications'
-  | 'announcements';
+  | "home"
+  | "login"
+  | "register"
+  | "search"
+  | "memorial"
+  | "my"
+  | "admin-dashboard"
+  | "admin-mypage"
+  | "family-groups"
+  | "notifications"
+  | "announcements";
 
 export interface Notification {
   id: string;
-  type: 'memorial' | 'offering' | 'family-invite' | 'anniversary' | 'announcement';
+  type:
+    | "memorial"
+    | "offering"
+    | "family-invite"
+    | "anniversary"
+    | "announcement";
   title: string;
   message: string;
   timestamp: Date;
@@ -32,22 +46,49 @@ export interface ListParams {
   page?: number;
   size?: number;
   sort?: {
-    field: 'deceasedName' |
-    'birthDate' |
-    'deathDate' |
-    'location' |
-    'biography' |
-    'photoUrl' |
-    'visibility' |
-    'status' |
-    'rejectionReason' |
-    'approvedBy' |
-    'approvedAt' |
-    'createdBy' |
-    'updatedBy' |
-    'createdAt' |
-    'updatedAt',
-    direction: 'asc' | 'desc'
+    field:
+      | "deceasedName"
+      | "birthDate"
+      | "deathDate"
+      | "location"
+      | "biography"
+      | "photoUrl"
+      | "visibility"
+      | "status"
+      | "rejectionReason"
+      | "approvedBy"
+      | "approvedAt"
+      | "createdBy"
+      | "updatedBy"
+      | "createdAt"
+      | "updatedAt";
+    direction: "asc" | "desc";
+  }[];
+}
+
+export interface PostListParams {
+  id: string;
+  token?: string;
+  page?: number;
+  size?: number;
+  sort?: {
+    field:
+      | "deceasedName"
+      | "birthDate"
+      | "deathDate"
+      | "location"
+      | "biography"
+      | "photoUrl"
+      | "visibility"
+      | "status"
+      | "rejectionReason"
+      | "approvedBy"
+      | "approvedAt"
+      | "createdBy"
+      | "updatedBy"
+      | "createdAt"
+      | "updatedAt";
+    direction: "asc" | "desc";
   }[];
 }
 
@@ -61,6 +102,8 @@ export type UserRole = "USER" | "ADMIN" | "SUPER_ADMIN";
 // Memorial
 export type Memorial = v.InferOutput<typeof MemorialItemSchema>;
 export type MemorialFilter = v.InferOutput<typeof MemorialSchema>;
+export type MemorialPost = v.InferOutput<typeof MemorialPostItemSchema>;
+export type MemorialPostList = v.InferOutput<typeof MemorialPostSchema>;
 
 // Family Group
 export type FamilyGroup = v.InferOutput<typeof FamilyGroupSchema>;
@@ -74,7 +117,13 @@ export interface MemorialFilterProps extends ListParams {
 
 export type Token = v.InferOutput<typeof TokenSchema>;
 
-export type FooterDialogType = 'faq' | 'inquiry' | 'guide' | 'terms' | 'privacy' | 'accessibility';
+export type FooterDialogType =
+  | "faq"
+  | "inquiry"
+  | "guide"
+  | "terms"
+  | "privacy"
+  | "accessibility";
 
 export interface FooterDialogProps {
   open: boolean;
@@ -123,9 +172,9 @@ export interface PostKakaoLoginParams {
 }
 
 export interface PostWriteAnnouncementParams {
-  title: string,
-  content: string,
-  isPinned: boolean,
+  title: string;
+  content: string;
+  isPinned: boolean;
 }
 
 export interface GetNotificationListParams {
@@ -154,6 +203,43 @@ export interface GetMemorialListParams {
   updatedBy: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface GetMemorialPostListParams {
+  size: number;
+  content: [
+    {
+      id: string;
+      memorialId: string;
+      userId: string;
+      content: string;
+      isPublic: boolean;
+      createdAt: string;
+      updatedAt: string;
+    },
+  ];
+  number: number;
+  sort: {
+    empty: boolean;
+    sorted: boolean;
+    unsorted: boolean;
+  };
+  numberOfElements: number;
+  pageable: {
+    offset: number;
+    sort: {
+      empty: boolean;
+      sorted: boolean;
+      unsorted: boolean;
+    };
+    paged: boolean;
+    pageNumber: number;
+    pageSize: number;
+    unpaged: boolean;
+  };
+  first: boolean;
+  last: boolean;
+  empty: boolean;
 }
 
 export interface PutUserProfileParams {

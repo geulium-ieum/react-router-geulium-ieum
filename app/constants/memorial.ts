@@ -1,5 +1,5 @@
-import * as v from 'valibot';
-import { ListSchema } from './list';
+import * as v from "valibot";
+import { ListSchema } from "./list";
 
 export const MemorialItemSchema = v.object({
   id: v.string(),
@@ -9,15 +9,30 @@ export const MemorialItemSchema = v.object({
   location: v.nullable(v.string()),
   biography: v.nullable(v.string()),
   photoUrl: v.nullable(v.string()),
-  visibility: v.picklist(['PUBLIC', 'PRIVATE', 'FAMILY_ONLY']),
-  status: v.picklist(['PENDING', 'REJECT', 'APPROVED', 'CANCEL']),
+  visibility: v.picklist(["PUBLIC", "PRIVATE", "FAMILY_ONLY"]),
+  status: v.picklist(["PENDING", "REJECT", "APPROVED", "CANCEL"]),
   createdBy: v.string(),
   updatedBy: v.string(),
   createdAt: v.string(),
-  updatedAt: v.string()
+  updatedAt: v.string(),
 });
 
 export const MemorialSchema = v.object({
   ...ListSchema.entries,
-  content: v.array(MemorialItemSchema)
+  content: v.array(MemorialItemSchema),
+});
+
+export const MemorialPostItemSchema = v.object({
+  id: v.string(),
+  memorialId: v.string(),
+  userId: v.string(),
+  content: v.string(),
+  isPublic: v.boolean(),
+  createdAt: v.string(),
+  updatedAt: v.string(),
+});
+
+export const MemorialPostSchema = v.object({
+  ...ListSchema.entries,
+  content: v.array(MemorialPostItemSchema),
 });

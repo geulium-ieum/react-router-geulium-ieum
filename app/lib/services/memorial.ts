@@ -1,6 +1,7 @@
 import type {
   ListParams,
   MemorialFilterProps,
+  PostListParams,
   Status,
   Visibility,
 } from "~/types";
@@ -9,6 +10,7 @@ import {
   getMemorialFilter,
   getMemorialDetail,
   getMemorialList,
+  getMemorialPostList,
   postMemorial,
   putMemorialDetail,
 } from "~/lib/apis/memorial";
@@ -34,6 +36,21 @@ class MemorialService {
         name,
         birthDate,
         deathDate,
+        page,
+        size,
+        sort,
+      });
+    },
+    memorialPostList: async ({
+      id,
+      token,
+      page,
+      size,
+      sort,
+    }: PostListParams) => {
+      return await getMemorialPostList({
+        id,
+        token,
         page,
         size,
         sort,

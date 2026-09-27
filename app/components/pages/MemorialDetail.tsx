@@ -13,7 +13,7 @@ import { userContext } from "~/context/userContext";
 import { getSession } from "~/lib/sessions.server";
 import { memorialService } from "~/lib/services/memorial";
 import { calculateAge } from "~/lib/utils";
-import type { Memorial, Status, User, Visibility } from "~/types";
+import type { Status, Visibility } from "~/types";
 import { MessageCircle } from "lucide-react";
 
 const visibilityLabel: Record<Visibility, string> = {
@@ -39,6 +39,9 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
   const session = await getSession(cookie);
   const token = session.get("token");
   const id = params.id;
+  const searchParams = new URL(request.url).searchParams;
+  const page = Number(searchParams.get("page") ?? 0);
+  const size = Number(searchParams.get("size") ?? 10);
 
   if (!id) {
     throw new Response("Not Found", { status: 404 });
@@ -46,7 +49,13 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
 
   try {
     const memorial = await memorialService.get.memorialDetail({ id, token });
-    return { user, token, memorial };
+    const memorialPostList = await memorialService.get.memorialPostList({
+      id,
+      token,
+      page,
+      size,
+    });
+    return { user, token, memorial, memorialPostList };
   } catch (error) {
     console.error(error);
     throw new Response("Not Found", { status: 404 });
@@ -117,10 +126,8 @@ export default function MemorialDetail({ loaderData }: Route.ComponentProps) {
     return null;
   }
 
-  const { user, memorial } = loaderData as {
-    user: User | null;
-    memorial: Memorial;
-  };
+  const { user, memorial, memorialPostList } = loaderData;
+  const posts = memorialPostList.content ?? [];
   const isOwner = Boolean(user && user.id === memorial.createdBy);
   const [isEdit, setIsEdit] = useState(false);
 
@@ -325,14 +332,32 @@ export default function MemorialDetail({ loaderData }: Route.ComponentProps) {
               </Card>
             )}
             <Card>
-              <CardHeader>
+              <CardHeader className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <MessageCircle className="w-5 h-5 text-purple-600 mr-2" />
                   추모글
                 </CardTitle>
+                <Button type="button" variant="outline">
+                  추모글 등록
+                </Button>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed"></p>
+                {posts.length === 0 ? (
+                  <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                    추모글이 없습니다.
+                  </p>
+                ) : (
+                  <ul className="space-y-4">
+                    {posts.map((post) => (
+                      <li
+                        key={post.id}
+                        className="text-gray-700 whitespace-pre-wrap leading-relaxed"
+                      >
+                        {post.content}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </CardContent>
             </Card>
           </div>
