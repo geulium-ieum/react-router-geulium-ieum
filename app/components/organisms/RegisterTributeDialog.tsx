@@ -16,8 +16,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { Button } from "../ui/button";
+import { useState } from "react";
 
-export default function RegisterTributeDialog({ isOpen, setIsOpen }) {
+export default function RegisterTributeDialog({
+  token,
+  isOpen,
+  setIsOpen,
+}: {
+  token?: string;
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const [visibility, setVisibility] = useState();
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -29,12 +40,22 @@ export default function RegisterTributeDialog({ isOpen, setIsOpen }) {
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="tribute">추모글</Label>
-              <Textarea id="tribute" rows={5} />
+              <Textarea id="tribute" rows={10} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="visibility">공개 설정</Label>
               <Select></Select>
             </div>
+          </div>
+          <div className="flex gap-3 justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+            >
+              취소
+            </Button>
+            <Button type="submit">등록</Button>
           </div>
         </Form>
       </DialogContent>

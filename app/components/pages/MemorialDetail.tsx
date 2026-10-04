@@ -15,6 +15,8 @@ import { memorialService } from "~/lib/services/memorial";
 import { calculateAge } from "~/lib/utils";
 import type { Status, Visibility } from "~/types";
 import { MessageCircle } from "lucide-react";
+import { tributeService } from "~/lib/services/tribute";
+import RegisterTributeDialog from "../organisms/RegisterTributeDialog";
 
 const visibilityLabel: Record<Visibility, string> = {
   PUBLIC: "공개",
@@ -38,24 +40,25 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
   const cookie = request.headers.get("Cookie");
   const session = await getSession(cookie);
   const token = session.get("token");
+  const userId = params.id;
   const id = params.id;
   const searchParams = new URL(request.url).searchParams;
   const page = Number(searchParams.get("page") ?? 0);
   const size = Number(searchParams.get("size") ?? 10);
 
-  if (!id) {
+  if (!id || !token) {
     throw new Response("Not Found", { status: 404 });
   }
 
   try {
     const memorial = await memorialService.get.memorialDetail({ id, token });
-    const memorialPostList = await memorialService.get.memorialPostList({
-      id,
+    const tributeList = await tributeService.get.tributeList({
+      userId,
       token,
       page,
       size,
     });
-    return { user, token, memorial, memorialPostList };
+    return { user, token, memorial, tributeList };
   } catch (error) {
     console.error(error);
     throw new Response("Not Found", { status: 404 });
@@ -126,10 +129,12 @@ export default function MemorialDetail({ loaderData }: Route.ComponentProps) {
     return null;
   }
 
-  const { user, memorial, memorialPostList } = loaderData;
-  const posts = memorialPostList.content ?? [];
+  const { user, token, memorial, tributeList } = loaderData;
+  const posts = tributeList.content ?? [];
   const isOwner = Boolean(user && user.id === memorial.createdBy);
   const [isEdit, setIsEdit] = useState(false);
+  const [isRegisterDialogOpen, setIsRegisterDialogOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="bg-gray-50">
@@ -337,7 +342,11 @@ export default function MemorialDetail({ loaderData }: Route.ComponentProps) {
                   <MessageCircle className="w-5 h-5 text-purple-600 mr-2" />
                   추모글
                 </CardTitle>
-                <Button type="button" variant="outline">
+                <Button
+                  onClick={() => setIsRegisterDialogOpen(true)}
+                  type="button"
+                  variant="outline"
+                >
                   추모글 등록
                 </Button>
               </CardHeader>
@@ -362,6 +371,11 @@ export default function MemorialDetail({ loaderData }: Route.ComponentProps) {
             </Card>
           </div>
         </div>
+        <RegisterTributeDialog
+          token={token}
+          isOpen={isRegisterDialogOpen}
+          setIsOpen={setIsRegisterDialogOpen}
+        />
       </div>
       <Footer />
     </div>
