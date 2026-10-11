@@ -4,21 +4,70 @@ import type { ListParams } from "~/types";
 import { tributeListSchema } from "~/constants/tribute";
 
 export async function getTributeList({
+  id,
+  token,
+}: ListParams & {
+  id: string;
+  token: string;
+}) {
+  try {
+    const response = await http
+      .get(`tribute/memorial/${id}/list`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .json();
+    return v.parse(tributeListSchema, response);
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getMyTributeList({
   userId,
-  token
+  token,
 }: ListParams & {
   userId: string;
   token: string;
 }) {
   try {
-      const response = await http.get(`tribute/user/${userId}/list`, {
-          headers: {
-              'Authorization': `Bearer ${token}`
-          }
-      }).json();
-      return v.parse(tributeListSchema, response);
+    const response = await http
+      .get(`tribute/user/${userId}/list`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .json();
+    return v.parse(tributeListSchema, response);
   } catch (error) {
-      throw error;
+    throw error;
+  }
+}
+
+export async function postTributeDetail({
+  id,
+  content,
+  isPublic,
+  token,
+}: {
+  id: string;
+  content: string;
+  isPublic: boolean;
+  token: string;
+}) {
+  try {
+    await http.post(`tribute/memorial/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      json: {
+        content,
+        isPublic,
+      },
+    });
+  } catch (error) {
+    throw error;
   }
 }
 
@@ -26,22 +75,22 @@ export async function putTributeDetail({
   id,
   content,
   isPublic,
-  token
+  token,
 }: {
-  id: string
-  content: string
-  isPublic: boolean
-  token: string
+  id: string;
+  content: string;
+  isPublic: boolean;
+  token: string;
 }) {
   try {
     await http.put(`tribute/${id}`, {
       headers: {
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
       json: {
         content,
-        isPublic
-      }
+        isPublic,
+      },
     });
   } catch (error) {
     throw error;
@@ -50,16 +99,16 @@ export async function putTributeDetail({
 
 export async function deleteTributeDetail({
   id,
-  token
+  token,
 }: {
-  id: string
-  token: string
+  id: string;
+  token: string;
 }) {
   try {
     await http.delete(`tribute/${id}`, {
       headers: {
-        'Authorization': `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
   } catch (error) {
     throw error;

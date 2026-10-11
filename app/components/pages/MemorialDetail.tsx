@@ -53,7 +53,7 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
   try {
     const memorial = await memorialService.get.memorialDetail({ id, token });
     const tributeList = await tributeService.get.tributeList({
-      userId,
+      id,
       token,
       page,
       size,
@@ -78,6 +78,14 @@ export async function action({ request, context, params }: Route.ActionArgs) {
 
   const formData = await request.formData();
   const intent = formData.get("intent");
+
+  if (intent === "createTribute") {
+    const content = String(formData.get("content"));
+    const isPublic = formData.get("isPublic") === "true";
+    if (!content) return { error: "추모글을 작성해주세요" };
+    await tributeService.post.tributeDetail({ id, token, content, isPublic });
+    return { ok: true };
+  }
 
   if (intent === "delete") {
     await memorialService.delete.memorialDetail({ id, token });

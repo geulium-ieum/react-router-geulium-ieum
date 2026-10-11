@@ -19,6 +19,33 @@ import {
 import { Button } from "../ui/button";
 import { useState } from "react";
 
+export interface ReigsterTribute {
+  content: string;
+  isPublic: boolean;
+}
+
+// export async function action({ request, params, context }: Route.ActionArgs) {
+//   const user = context.get(userContext);
+//   const cookie = request.headers.get("Cookie");
+//   const session = await getSession(cookie);
+//   const token = session.get("token");
+//   const formData = await request.formData();
+//   const id = params.id;
+//   const content = formData.get("content");
+//   const isPublic = formData.get("isPublic") === "true";
+//   try {
+//     const response = await tributeService.post.tributeDetail({
+//       id: id as string,
+//       content: content as string,
+//       isPublic: isPublic as boolean,
+//       token: token as string,
+//     });
+//     return response;
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }
+
 export default function RegisterTributeDialog({
   token,
   isOpen,
@@ -28,7 +55,10 @@ export default function RegisterTributeDialog({
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const [visibility, setVisibility] = useState();
+  const [registerTribute, setRegisterTribute] = useState<ReigsterTribute>({
+    content: "",
+    isPublic: true,
+  });
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -36,15 +66,52 @@ export default function RegisterTributeDialog({
           <DialogTitle>추모글 등록</DialogTitle>
           <DialogDescription>추모글을 작성해주세요.</DialogDescription>
         </DialogHeader>
-        <Form>
+        <Form method="post">
+          <input type="hidden" name="intent" value="createTribute" />
+          <input type="hidden" name="content" value={registerTribute.content} />
+          <input
+            type="hidden"
+            name="isPublic"
+            value={String(registerTribute.isPublic)}
+          />
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="tribute">추모글</Label>
-              <Textarea id="tribute" rows={10} />
+              <Label htmlFor="content">
+                추모글 <span className="text-red-500">*</span>
+              </Label>
+              <Textarea
+                id="content"
+                rows={10}
+                value={registerTribute.content}
+                onChange={(e) =>
+                  setRegisterTribute((prev) => ({
+                    ...prev,
+                    content: e.target.value,
+                  }))
+                }
+              />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="visibility">공개 설정</Label>
-              <Select></Select>
+              <Label htmlFor="visibility">
+                공개 설정 <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={String(registerTribute.isPublic)}
+                onValueChange={(value) =>
+                  setRegisterTribute((prev) => ({
+                    ...prev,
+                    isPublic: value === "true",
+                  }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="공개 여부" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">공개</SelectItem>
+                  <SelectItem value="false">비공개</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="flex gap-3 justify-end">
@@ -55,7 +122,9 @@ export default function RegisterTributeDialog({
             >
               취소
             </Button>
-            <Button type="submit">등록</Button>
+            <Button type="submit" onClick={() => setIsOpen(false)}>
+              등록
+            </Button>
           </div>
         </Form>
       </DialogContent>

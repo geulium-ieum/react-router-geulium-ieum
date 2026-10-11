@@ -104,7 +104,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     return redirect("/login");
   }
   try {
-    const myTributes = await tributeService.get.tributeList({
+    const myTributes = await tributeService.get.myTributeList({
       userId: user.id,
       token,
     });
