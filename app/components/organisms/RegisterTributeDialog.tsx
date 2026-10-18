@@ -24,28 +24,6 @@ export interface ReigsterTribute {
   isPublic: boolean;
 }
 
-// export async function action({ request, params, context }: Route.ActionArgs) {
-//   const user = context.get(userContext);
-//   const cookie = request.headers.get("Cookie");
-//   const session = await getSession(cookie);
-//   const token = session.get("token");
-//   const formData = await request.formData();
-//   const id = params.id;
-//   const content = formData.get("content");
-//   const isPublic = formData.get("isPublic") === "true";
-//   try {
-//     const response = await tributeService.post.tributeDetail({
-//       id: id as string,
-//       content: content as string,
-//       isPublic: isPublic as boolean,
-//       token: token as string,
-//     });
-//     return response;
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }
-
 export default function RegisterTributeDialog({
   token,
   isOpen,

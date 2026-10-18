@@ -17,6 +17,7 @@ import type { Status, Visibility } from "~/types";
 import { MessageCircle } from "lucide-react";
 import { tributeService } from "~/lib/services/tribute";
 import RegisterTributeDialog from "../organisms/RegisterTributeDialog";
+import { Spinner } from "../ui/spinner";
 
 const visibilityLabel: Record<Visibility, string> = {
   PUBLIC: "공개",
@@ -71,9 +72,14 @@ export async function action({ request, context, params }: Route.ActionArgs) {
   const session = await getSession(cookie);
   const token = session.get("token");
   const id = params.id;
+  const [isLoading, setIsLoading] = useState(true);
 
   if (!user || !token || !id) {
     return redirect("/login");
+  }
+
+  if (!isLoading) {
+    return <Spinner className="size-8" />;
   }
 
   const formData = await request.formData();
