@@ -33,6 +33,7 @@ import { tributeService } from "~/lib/services/tribute";
 import { toast } from "sonner";
 import { memorialService } from "~/lib/services/memorial";
 import type { Status, Visibility } from "~/types";
+import { destroySession } from "~/lib/sessions.server";
 
 const isPublicOptions: {
   value: Boolean;
@@ -127,6 +128,7 @@ export async function action({ request, context }: Route.ActionArgs) {
   const session = await getSession(cookie);
   const token = session.get("token");
   const formData = await request.formData();
+  const requestMethod = formData.get("requestMethod") as string;
   const name = formData.get("name") as string;
   const phone = formData.get("phone") as string;
   const marketingAgreed = formData.get("marketingAgreed") as "true" | "false";
@@ -134,19 +136,32 @@ export async function action({ request, context }: Route.ActionArgs) {
   if (!user || !token) {
     return redirect("/login");
   }
-
-  try {
-    await userService.put.userProfile({
-      name,
-      phone,
-      marketingAgreed: isMarketingAgreed,
-      userId: user.id,
-      token,
-    });
-    return { isUpdated: true, updatedAt: Date.now() };
-  } catch (error) {
-    console.error(error);
-    return { isUpdated: false, updatedAt: Date.now() };
+  if (requestMethod === "DELETE") {
+    try {
+      await userService.delete.user({ userId: user?.id, token });
+      return redirect("/", {
+        headers: {
+          "Set-Cookie": await destroySession(session),
+        },
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  if (requestMethod === "PUT") {
+    try {
+      await userService.put.userProfile({
+        name,
+        phone,
+        marketingAgreed: isMarketingAgreed,
+        userId: user.id,
+        token,
+      });
+      return { isUpdated: true, updatedAt: Date.now() };
+    } catch (error) {
+      console.error(error);
+      return { isUpdated: false, updatedAt: Date.now() };
+    }
   }
 }
 
@@ -422,11 +437,18 @@ export default function Mypage({
       <FlexDiv className="flex-col gap-y-6">
         <h1 className="text-3xl text-gray-900">마이페이지</h1>
         <Card>
-          <CardHeader>
+          <CardHeader className="flex items-start justify-between mb-2">
             <CardTitle>내 정보</CardTitle>
+            <Form method="DELETE">
+              <input type="hidden" name="requestMethod" value="DELETE" />
+              <Button variant="outline" className="text-red-500" type="submit">
+                회원 탈퇴
+              </Button>
+            </Form>
           </CardHeader>
           <CardContent>
             <Form method="PUT">
+              <input type="hidden" name="requestMethod" value="PUT" />
               <FieldGroup>
                 <Field>
                   <FieldLabel htmlFor="name">이름</FieldLabel>

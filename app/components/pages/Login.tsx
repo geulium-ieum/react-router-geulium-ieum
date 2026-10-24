@@ -10,19 +10,14 @@ import { commitSession, getSession } from "~/lib/sessions.server";
 import { toast } from "sonner";
 import { useEffect } from "react";
 import { useActionData } from "react-router";
-import { Spinner } from "../ui/spinner";
 
 export async function action({ request }: Route.ActionArgs) {
   const session = await getSession(request.headers.get("Cookie"));
   const formData = await request.formData();
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const [isLoading, setIsLoading] = useState(true);
   if (!email || !password) {
     return;
-  }
-  if (!isLoading) {
-    return <Spinner className="size-8" />;
   }
   try {
     const response = await userService.post.login({ email, password });
@@ -37,8 +32,6 @@ export async function action({ request }: Route.ActionArgs) {
     return {
       error: "아이디 또는 비밀번호를 다시 입력해주세요.",
     };
-  } finally {
-    setIsLoading(false);
   }
 }
 

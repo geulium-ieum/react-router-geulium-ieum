@@ -72,14 +72,9 @@ export async function action({ request, context, params }: Route.ActionArgs) {
   const session = await getSession(cookie);
   const token = session.get("token");
   const id = params.id;
-  const [isLoading, setIsLoading] = useState(true);
 
   if (!user || !token || !id) {
     return redirect("/login");
-  }
-
-  if (!isLoading) {
-    return <Spinner className="size-8" />;
   }
 
   const formData = await request.formData();
