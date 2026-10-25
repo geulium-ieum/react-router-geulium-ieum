@@ -3,7 +3,7 @@ import { Button } from "~/components/ui/button";
 import React, { useEffect, useState } from "react";
 import type { Route } from "./+types/Mypage";
 import { userContext } from "~/context/userContext";
-import { getSession } from "~/lib/sessions.server";
+import { getSession, destroySession } from "~/lib/sessions.server";
 import { Form, redirect, useRevalidator } from "react-router";
 import { userService } from "~/lib/services/user";
 import { Input } from "~/components/ui/input";
@@ -33,7 +33,6 @@ import { tributeService } from "~/lib/services/tribute";
 import { toast } from "sonner";
 import { memorialService } from "~/lib/services/memorial";
 import type { Status, Visibility } from "~/types";
-import { destroySession } from "~/lib/sessions.server";
 
 const isPublicOptions: {
   value: Boolean;

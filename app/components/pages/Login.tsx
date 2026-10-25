@@ -142,12 +142,17 @@ export default function Login() {
               <input type="checkbox" className="rounded" />
               <span className="text-gray-600">로그인 유지</span>
             </label>
-            <a
-              href="/find-password"
-              className="text-purple-600 hover:underline"
-            >
-              비밀번호 찾기
-            </a>
+            <div className="flex items-center gap-4">
+              <a href="/find-id" className="text-purple-600 hover:underline">
+                아이디 찾기
+              </a>
+              <a
+                href="/find-password"
+                className="text-purple-600 hover:underline"
+              >
+                비밀번호 찾기
+              </a>
+            </div>
           </div>
 
           <Button type="submit" className="w-full">
