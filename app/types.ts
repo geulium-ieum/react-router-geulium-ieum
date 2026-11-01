@@ -177,6 +177,12 @@ export interface PostWriteAnnouncementParams {
   isPinned: boolean;
 }
 
+export interface PostFindIdParams {
+  name: string;
+  phone: string;
+}
+
+export interface PostFindPassword {}
 export interface GetNotificationListParams {
   id: number;
   userId: number;

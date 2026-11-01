@@ -13,6 +13,7 @@ import type {
   ListParams,
   PutUserProfileParams,
   DeleteUserParams,
+  PostFindIdParams,
 } from "~/types";
 import { MemorialSchema } from "~/constants/memorial";
 
@@ -184,6 +185,19 @@ export async function postWriteAnnouncement({
       })
       .json();
     return v.parse(TokenSchema, response);
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function postFindId({ name, phone }: PostFindIdParams) {
+  try {
+    const response = await http
+      .post("auth/find-id", {
+        json: { name, phone },
+      })
+      .json();
+    return response;
   } catch (error) {
     throw error;
   }
