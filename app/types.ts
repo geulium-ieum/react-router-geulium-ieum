@@ -182,7 +182,9 @@ export interface PostFindIdParams {
   phone: string;
 }
 
-export interface PostFindPassword {}
+export interface PostFindPasswordParams {
+  email: string;
+}
 export interface GetNotificationListParams {
   id: number;
   userId: number;

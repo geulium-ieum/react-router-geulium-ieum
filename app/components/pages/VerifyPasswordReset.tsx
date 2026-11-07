@@ -1,26 +1,16 @@
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Route } from "./+types/FindPassword";
 import { userService } from "~/lib/services/user";
 import { redirect } from "react-router";
 import { Form } from "react-router";
 
-export async function action({ request }: Route.ActionArgs) {
-  const formData = await request.formData();
-  const email = formData.get("email") as string;
-  console.log("email", email);
-  try {
-    await userService.post.changePassword({ email });
-    return redirect("/login");
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-export default function FindPassword() {
+export default function VerifyPasswordReset() {
   const [email, setEmail] = useState<string>("");
+  const [code, setCode] = useState<string>("");
+  const [newPassword, setNewPassword] = useState<string>("");
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <Card>

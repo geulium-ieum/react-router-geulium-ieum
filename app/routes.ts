@@ -31,7 +31,8 @@ export default [
     route("/mypage", "./components/pages/Mypage.tsx"),
     route("/announcements", "./components/pages/Announcements.tsx"),
     route("/announcements/:id", "./components/pages/AnnouncementsDetail.tsx"),
-    route("/find-id", "./components/FindId.tsx"),
-    route("/find-password", "./components/FindPassword.tsx"),
+    route("/find-id", "./components/pages/FindId.tsx"),
+    route("/find-password", "./components/pages/FindPassword.tsx"),
+    route("/auth/password-reset", "./components/pages/VerifyPasswordReset.tsx"),
   ]),
 ] satisfies RouteConfig;
