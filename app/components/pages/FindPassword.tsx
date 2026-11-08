@@ -6,6 +6,7 @@ import type { Route } from "./+types/FindPassword";
 import { userService } from "~/lib/services/user";
 import { redirect } from "react-router";
 import { Form } from "react-router";
+import { toast } from "sonner";
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
@@ -13,9 +14,12 @@ export async function action({ request }: Route.ActionArgs) {
   console.log("email", email);
   try {
     await userService.post.changePassword({ email });
-    return redirect("/login");
+    toast.success("인증 요청이 완료되었습니다.");
+    return redirect("/verify-password-reset");
   } catch (error) {
     console.log(error);
+    toast.error("인증 요청에 실패했습니다.");
+    return redirect("/find-password");
   }
 }
 
@@ -33,7 +37,7 @@ export default function FindPassword() {
     <div className="flex flex-col items-center justify-center h-screen">
       <Card>
         <CardHeader>
-          <CardTitle>비밀번호 재설정</CardTitle>
+          <CardTitle>비밀번호 재설정 인증 요청</CardTitle>
         </CardHeader>
         <CardContent>
           <Form method="POST" className="flex flex-col gap-4 w-78">

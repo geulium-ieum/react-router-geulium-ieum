@@ -130,9 +130,11 @@ export async function postVerifyChangePassword({
   newPassword,
 }: PostVerifyChangePasswordParams) {
   try {
-    const response = await http.post("auth/password-reset/verify", {
-      json: { code, email, newPassword },
-    });
+    const response = await http
+      .post("auth/password-reset/verify", {
+        json: { code, email, newPassword },
+      })
+      .json();
     return response;
   } catch (error) {
     throw error;
