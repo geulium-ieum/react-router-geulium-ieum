@@ -38,7 +38,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "~/components/ui/combobox";
-import { useRevalidator } from "react-router";
+import { useRevalidator, Link } from "react-router";
 
 interface MemberRole {
   value: FamilyGroupMember["role"];
@@ -397,9 +397,20 @@ export default function FamilyGroupDetail({
           {memorialContent.length > 0 ? (
             <FlexDiv className="flex-col gap-y-6">
               {memorialContent.map((memorial) => (
-                <Card key={memorial.id}>
-                  <h3 className="text-xl mb-6">추모관 목록</h3>
-                </Card>
+                <Link to={`/memorial/${memorial.id}`} key={memorial.id}>
+                  <Card key={memorial.id} className="p-6">
+                    <h3 className="text-xl mb-6">
+                      {memorial.deceasedName} 추모관
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {memorial.birthDate} - {memorial.deathDate}
+                    </p>
+                    <p className="text-sm text-gray-500">{memorial.location}</p>
+                    <p className="text-sm text-gray-500">
+                      {memorial.biography}
+                    </p>
+                  </Card>
+                </Link>
               ))}
             </FlexDiv>
           ) : (
